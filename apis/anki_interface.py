@@ -5,8 +5,11 @@ import urllib.request
 class AnkiInterface:
     def __init__(self, session):
         self.session = session
+        self.deck_id = None
+        self.deck_name = None
+        session.anki_interface = self
 
-    def call_api(self, action: str, **params: str):
+    def call_api(self, action, **params):
         request = {"action": action, "params": params, "version": 6}
         requestJson = json.dumps(request).encode("utf-8")
         response = json.load(
