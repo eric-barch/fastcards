@@ -4,11 +4,9 @@ import os
 import openai
 from dotenv import load_dotenv
 
-from models.session import Session
-
 
 class OpenAiInterface:
-    def __init__(self, session: Session):
+    def __init__(self, session):
         load_dotenv()
         openai.api_key = os.getenv("OPENAI_API_KEY")
         self.session = session

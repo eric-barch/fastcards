@@ -1,4 +1,3 @@
-from models.session import Session
 from models.source_text.source_text import SourceText
 
 

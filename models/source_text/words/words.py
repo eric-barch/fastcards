@@ -1,3 +1,6 @@
+from models.source_text.words.word import Word
+
+
 class Words(list):
     def __init__(self, source_text):
         super().__init__()
@@ -9,4 +12,6 @@ class Words(list):
         words = self.session.openai_interface.deconstruct_french(
             self.source_text.french
         )
-        print(words)
+
+        for word_index, word in enumerate(words):
+            self.append(Word(self, word, word_index))
