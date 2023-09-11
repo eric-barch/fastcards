@@ -21,7 +21,7 @@ class OpenAiInterface:
                 {"role": "system", "content": systemPrompt},
                 {
                     "role": "user",
-                    "content": f"Sentence: {string}",
+                    "content": string,
                 },
             ],
         )
@@ -59,5 +59,49 @@ class OpenAiInterface:
         system_prompt = self.deconstruct_french_string_system_prompt()
         response_str = self.call_api(system_prompt, french_string)
         response_obj = json.loads(response_str)
-        self.session.component_words = response_obj
         return response_obj
+
+    def get_clean_french_system_prompt(self):
+        return """
+          You will receive a string in French. The user may not have properly accened and/or spelled
+          the words in that string. Your job is to clean up the string (add any accents, correct
+          any misspellings, etc.) using the context of the entire sentence to determine intended
+          meaning.
+
+          Example Input/Output:
+
+          Input: ecole
+          Output: école
+
+          Input: Ils continuerent leurs emplettes dans les boutiques qui s'alignaient le long de la rue et bientot
+          Output: Ils continuèrent leurs emplettes dans les boutiques qui s'alignaient le long de la rue et bientôt
+
+          Input: Vous netes pas oblige, dit-il. Je le sais bien, mais je veux t'offrir un animal.
+          Output: Vous n'êtes pas obligé, dit-il. Je le sais bien, mais je veux t'offrir un animal.
+        """
+
+    def get_clean_french(self, input):
+        system_prompt = self.get_clean_french_system_prompt()
+        response = self.call_api(system_prompt, input)
+        return response
+
+    def get_english_translation_system_prompt(self):
+        return """
+          You will receive a string in French. Return the English translation of that string.
+
+          Example Input/Output:
+
+          Input: Salut comment vas-tu?
+          Output: Hi, how are you doing?
+
+          Input: Je dois aussi t'offrir un cadeau pour ton anniversaire.
+          Output: I also need to give you a gift for your birthday.
+
+          Input: Vingt minutes plus tard, Harry sortit du magasin de chouettes avec une grande cage.
+          Output: Twenty minutes later Harry came out of the owl shop with a large cage.
+        """
+
+    def get_english_translation(self, input):
+        system_prompt = self.get_english_translation_system_prompt()
+        response = self.call_api(system_prompt, input)
+        return response
