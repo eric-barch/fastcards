@@ -1,4 +1,7 @@
-class Source:
+from models.source_text.words.words import Words
+
+
+class SourceText:
     def __init__(self, session, input):
         self.session = session
         self.input = input
@@ -8,4 +11,4 @@ class Source:
             self.french
         )
         print(f"English: {self.english}")
-        # self.words = Words(self)
+        self.words = Words(self)

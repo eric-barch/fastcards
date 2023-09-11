@@ -1,5 +1,5 @@
 from models.session import Session
-from models.source import Source
+from models.source_text.source_text import SourceText
 
 
 class UserInterface:
@@ -42,4 +42,4 @@ class UserInterface:
             if user_input == "exit":
                 break
 
-            translation = Source(self.session, user_input)
+            translation = SourceText(self.session, user_input)

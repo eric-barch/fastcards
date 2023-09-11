@@ -27,7 +27,7 @@ class OpenAiInterface:
         )
         return response.choices[0].message.content
 
-    def deconstruct_french_string_system_prompt(self):
+    def deconstruct_french_system_prompt(self):
         return """
           You will receive a string in French. Return a JSON array containing the string's
           constituent words. Adhere to the following rules:
@@ -55,8 +55,8 @@ class OpenAiInterface:
           Output: ["ce", "ne", "être", "pas", "une", "mauvaise", "idée", "répondit", "Hagrid", "de", "toute", "façon", "tu", "ne", "en", "savoir", "pas", "encore", "assez", "pour", "jeter", "des", "sorts"]
         """
 
-    def deconstruct_french_string(self, french_string):
-        system_prompt = self.deconstruct_french_string_system_prompt()
+    def deconstruct_french(self, french_string):
+        system_prompt = self.deconstruct_french_system_prompt()
         response_str = self.call_api(system_prompt, french_string)
         response_obj = json.loads(response_str)
         return response_obj
