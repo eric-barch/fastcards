@@ -23,10 +23,11 @@ class UserInterface:
                 continue
 
             try:
-                deck = list(deck_dict.keys())[choice - 1]
-                deck_id = deck_dict[deck]
-                # TODO: Add these values to the anki interface.
-                print(f"\nDeck selected: {deck} (ID: {deck_id})")
+                deck_id = deck_dict[deck_name]
+                deck_name = list(deck_dict.keys())[choice - 1]
+                self.session.anki_interface.deck_id = deck_id
+                self.session.anki_interface.deck_name = deck_name
+                print(f"\nDeck selected: {deck_name} (ID: {deck_id})")
                 break
             except:
                 print("\nInvalid choice. Please select a number from the list.")
