@@ -79,6 +79,7 @@ class OpenAiInterface:
               n'en -> ne en
               l'école -> le école
               j'allais -> je aller
+              d'un -> de un
           
           Below you will find some examples of input and desired output.
 
@@ -103,25 +104,14 @@ class OpenAiInterface:
 
     def get_word_details_system_prompt(self):
         return """
-          You will receive a JSON array of French words in the following format:
+          You will receive a single French word. Return a JSON object containing the word details
+          as formatted below.
 
-          [
-            "word1",
-            ...
-          ]
-
-          Return a JSON array containing the details of each word in the "words" array formatted as
-          below.
-
-          [
-            {
-              "french": word1 in its original French,
-              "english": word1's English translation,
-              "part_of_speech": word1's part of speech,
-              "gender": "male", "female", or null if not applicable,
-            },
-            ...
-          ]
+          {
+            "english": word's English translation,
+            "part_of_speech": word's part of speech,
+            "gender": word's gender, or null if not applicable,
+          }
 
           If the word is a verb, its English translation should usually be preceded by "to",
           e.g. "to be", "to have", "to go", etc.
@@ -139,14 +129,14 @@ class OpenAiInterface:
             - "article"
           
           For gender, choose one of the following three options:
-            - "male"
-            - "female"
+            - "masculine"
+            - "feminine"
             - null (if the concept of gender does not apply to the word)
         """
 
-    def get_word_details(self, words):
+    def get_word_details(self, word):
         system_prompt = self.get_word_details_system_prompt()
-        user_string = json.dumps(words)
+        user_string = word
 
         response_str = self.call_api(
             system_prompt,

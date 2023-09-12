@@ -27,8 +27,16 @@ class AnkiInterface:
             raise Exception(response["error"])
         return response["result"]
 
-    def get_decks(self):
+    def get_deck_names_and_ids(self):
         return self.call_api("deckNamesAndIds")
+
+    def check_for_note(self, word):
+        query = f'deck:"{self.deck_name}" "front:{word}"'
+
+        return self.call_api(
+            "findNotes",
+            query=query,
+        )
 
     def add_note(self, front_content, back_content):
         return self.call_api(

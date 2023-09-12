@@ -7,21 +7,42 @@ class WordList(list):
         super().__init__()
         self.session = session
         self.french_string = french_string
-        self.deconstruct_french_string()
+        self.get_all_words()
+        self.get_unique_words()
+        self.get_noteless_words()
         self.create_word_objects()
 
-    def deconstruct_french_string(self):
-        self.deconstructed_french_string = (
-            self.session.openai_interface.deconstruct_french_string(self.french_string)
+    def get_all_words(self):
+        self.all_words = self.session.openai_interface.deconstruct_french_string(
+            self.french_string
         )
-        print(f"\ndeconstructed_french_string: {self.deconstructed_french_string}")
+        print(f"all_words: {json.dumps(self.all_words)}")
+
+    def get_unique_words(self):
+        self.unique_words = []
+        for word in self.all_words:
+            if word not in self.unique_words:
+                self.unique_words.append(word)
+        print(f"unique_words: {json.dumps(self.unique_words)}")
+
+    def get_noteless_words(self):
+        self.noteless_words = []
+        for word in self.unique_words:
+            note_id = self.session.anki_interface.check_for_note(word)
+            if note_id:
+                print(f"Note already exists: {word} (ID: {note_id})")
+            else:
+                self.noteless_words.append(word)
+        print(f"noteless_words: {json.dumps(self.noteless_words)}")
 
     def create_word_objects(self):
-        responses = self.session.openai_interface.get_word_details(
-            self.deconstructed_french_string,
-        )
-
-        print(json.dumps(responses, indent=2))
+        for word in self.noteless_words:
+            word_details = WordDetails(
+                self.session,
+                self,
+                word,
+            )
+            self.append(word_details)
 
         # for response in responses:
         #     word_details = WordDetails(
