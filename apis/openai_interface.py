@@ -25,14 +25,13 @@ class OpenAiInterface:
         )
         return response.choices[0].message.content
 
-    def get_french_and_english_system_prompt(self):
-        return """
-          You will receive a string in French. There may be misspellings or improper/missing 
-          accentation. You should return a JSON object with the fields "french" and "english".
-          The "french" field should contain a cleaned up version of the input string (correct
-          any misspellings, add any accents, etc.) in French. The "english" field should contain 
-          the English translation of the input string. For both fields, use the context of the 
-          entire string to determine the intended meaning.
+    def get_french_and_english_strings_system_prompt(self):
+        return """You will receive a string in French. There may be misspellings or 
+          improper/missing accentation. You should return a JSON object with the fields "french" 
+          and "english". The "french" field should contain a cleaned up version of the input string
+          (correct any misspellings, add any accents, etc.) in French. The "english" field should 
+          contain the English translation of the input string. For both fields, use the context of 
+          the entire string to determine the intended meaning.
 
           Example Input/Output:
 
@@ -52,100 +51,102 @@ class OpenAiInterface:
           Output: {
             "french": "Il y avait des tas de choses à acheter: des robes, des gants, des chapeaux, des bottes",
             "english": "There were lots of things to buy: dresses, gloves, hats, boots"
-          }
-        """
+          }"""
 
-    def get_french_and_english(self, input):
-        system_prompt = self.get_french_and_english_system_prompt()
+    def get_french_and_english_strings(self, input):
+        system_prompt = self.get_french_and_english_strings_system_prompt()
         response_str = self.call_api(system_prompt, input)
         response_obj = json.loads(response_str)
         return response_obj
 
-    def deconstruct_french_system_prompt(self):
+    def deconstruct_french_string_system_prompt(self):
         return """
           You will receive a string in French. Return a JSON array containing the string's
           constituent words. Adhere to the following rules:
 
-          1.  Deconstruct any contractions into their constituent words. 
-              Example: m'appelle -> me appeler
-          2.  Make verbs infinitive. Use the context of the entire string to confirm
-              that the input word is indeed a conjugated verb and not some other part of speech.
-              Example: appelle -> appeler
-          3.  Make nouns singular.
-              Example: cadeaux -> cadeau
-          4.  Make adjectives masculine.
-              Example: mauvaise -> mauvais
+          1.  Make verbs infinitive. Use the context of the entire string to confirm
+              that the input word is indeed a conjugated verb. If a conjugated verb is being used
+              as an adjective, adverb, or noun, do not make it infinitive.
+              Examples:
+              appelle -> appeler
+              sais -> savoir
+              suis -> être
+              délabrée -> délabrée (stays the same because it is an adjective)
+          2.  Deconstruct any contractions (usually, two words joined by an apostrophe) into their 
+              constituent words. 
+              Example: 
+              m'appelle -> me appeler
+              n'en -> ne en
+              l'école -> le école
+              j'allais -> je aller
           
-          Below you will find some examples of input and output. Model your response after these
-          examples.
+          Below you will find some examples of input and desired output.
 
           Input: Bonjour, je m'appelle Harry Potter. Je suis un sorcier.
           Output: ["bonjour", "je", "me", "appeler", "Harry", "Potter", "je", "être", "un", "sorcier"]
 
           Input: Au-dessus de la porte, des lettres d'or écaillées indiquaient : << Ollivander >>
-          Output: ["au-dessus", "de", "le", "porte", "des", "lettre", "de", "or", "écailler", "indiquer", "Ollivander"]
+          Output: ["au-dessus", "de", "la", "porte", "des", "lettres", "de", "or", "écailler", "indiquer", "Ollivander"]
 
-          Input: Ce ne serait pas une mauvaise idee, repondit Hagrid. De toute facon, tu n'en sais pas encore assez pour jeter des sorts.
-          Output: ["ce", "ne", "être", "pas", "une", "mauvais", "idée", "répondre", "Hagrid", "de", "tout", "façon", "tu", "ne", "en", "savoir", "pas", "encore", "assez", "pour", "jeter", "des", "sort"]
+          Input: Ce ne serait pas une mauvaise idée, répondit Hagrid. De toute façon, tu n'en sais pas encore assez pour jeter des sorts.
+          Output: ["ce", "ne", "être", "pas", "une", "mauvaise", "idée", "répondre", "Hagrid", "de", "toute", "façon", "tu", "ne", "en", "savoir", "pas", "encore", "assez", "pour", "jeter", "des", "sorts"]
+
+          Input: La dernière boutique dans laquelle ils pénétrèrent était étroite et délabrée.
+          Output: ["la", "dernière", "boutique", "dans", "laquelle", "ils", "pénétrer", "être", "étroite", "et", "délabrée"]
         """
 
-    def deconstruct_french(self, french_string):
-        system_prompt = self.deconstruct_french_system_prompt()
+    def deconstruct_french_string(self, french_string):
+        system_prompt = self.deconstruct_french_string_system_prompt()
         response_str = self.call_api(system_prompt, french_string)
         response_obj = json.loads(response_str)
         return response_obj
 
     def get_word_details_system_prompt(self):
         return """
-          You will receive a JSON object in the following format:
+          You will receive a JSON array of French words in the following format:
 
-          {
-            "string": "string",
-            "words": [
-              "word1",
-              "word2",
-              "word3",
-              ...
-            ],
-            "word_index": integer,
-            "word": "word"
-          }
+          [
+            "word1",
+            ...
+          ]
 
-          The "string" field contains the original string in French. The "words" field contains the
-          constituent words of the "string" field in order, sometimes with minor changes made to
-          that word's form to standardize tense, masculinity, etc. The "word_index" field contains 
-          the index of the word in the "words" field that you should return details for. The "word"
-          field contains the string value of the word at the index specified by the "word_index" field.
-          This is provided so you can confirm that you are returning details for the correct word.
+          Return a JSON array containing the details of each word in the "words" array formatted as
+          below.
 
-          Return a JSON object containing the following fields for the specified word:
+          [
+            {
+              "french": word1 in its original French,
+              "english": word1's English translation,
+              "part_of_speech": word1's part of speech,
+              "gender": "male", "female", or null if not applicable,
+            },
+            ...
+          ]
 
-          {
-            "word": the original word from the "word" field in French,
-            "english": the English translation of the word,
-            "part_of_speech": the part of speech of the word,
-            "french_definition": the definition of the word in French,
-            "english_definition": the definition of the word in English
-          }
+          If the word is a verb, its English translation should usually be preceded by "to",
+          e.g. "to be", "to have", "to go", etc.
 
-          For part of speech, choose the best fit from the following list:
-            - noun
-            - verb
-            - adjective
-            - adverb
-            - pronoun
-            - preposition
-            - conjunction
-            - interjection
-            - article
+          For part_of_speech, choose the best fit from the following list:
+            - "noun"
+            - "proper noun"
+            - "verb"
+            - "adjective"
+            - "adverb"
+            - "pronoun"
+            - "preposition"
+            - "conjunction"
+            - "interjection"
+            - "article"
+          
+          For gender, choose one of the following three options:
+            - "male"
+            - "female"
+            - null (if the concept of gender does not apply to the word)
         """
 
-    def get_word_details(self, string, words, word_index, word):
+    def get_word_details(self, words):
         system_prompt = self.get_word_details_system_prompt()
-        user_string = f'{{"string": "{string}", "words": {json.dumps(words)}, "word_index": {word_index}, "word": "{word}"}}'
-
-        # print(f"User string: {user_string}")
-        # print(f"User string type: {type(user_string)}")
+        user_string = json.dumps(words)
 
         response_str = self.call_api(
             system_prompt,
