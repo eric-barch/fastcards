@@ -1,7 +1,4 @@
-from apis.anki_interface import AnkiInterface
-from apis.openai_interface import OpenAiInterface
 from models.session import Session
-from models.user_interface import UserInterface
 
 
 def main():
