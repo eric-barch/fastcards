@@ -43,14 +43,3 @@ class WordList(list):
                 word,
             )
             self.append(word_details)
-
-        # for response in responses:
-        #     word_details = WordDetails(
-        #         self.session,
-        #         self,
-        #         response["french"],
-        #         response["english"],
-        #         response["part_of_speech"],
-        #         response["is_masculine"],
-        #     )
-        #     self.append(word_details)
