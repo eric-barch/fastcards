@@ -1,5 +1,4 @@
-from models.session import Session
-from models.source_text.source_text import SourceText
+from models.source_text.source_string import SourceString
 
 
 class UserInterface:
@@ -7,7 +6,7 @@ class UserInterface:
         self.session = session
 
     def choose_deck(self):
-        deck_dict = self.session.anki_interface.get_decks()
+        deck_dict = self.session.anki_interface.get_deck_names_and_ids()
 
         print("\nChoose a deck:")
         for i, (deck_name, deck_id) in enumerate(deck_dict.items(), 1):
@@ -42,4 +41,4 @@ class UserInterface:
             if user_input == "exit":
                 break
 
-            translation = SourceText(self.session, user_input)
+            SourceString(self.session, user_input)
