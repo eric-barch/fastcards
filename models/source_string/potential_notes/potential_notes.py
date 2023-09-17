@@ -29,6 +29,20 @@ class PotentialNotes:
         self.tokens = self.set_tokens(parsed_tokens, translated_tokens)
         self.potential_notes = self.create_potential_notes()
 
+        print(self)
+
+    def __repr__(self):
+        repr = "\n"
+
+        for i, potential_note in enumerate(self.potential_notes):
+            number = f"{i + 1}."
+            repr += f"{number:<5}{potential_note}"
+
+            if i != len(self.potential_notes) - 1:
+                repr += "\n"
+
+        return repr
+
     def parse_tokens(self):
         parsed_string = nlp(self.string)
 
