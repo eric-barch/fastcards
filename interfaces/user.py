@@ -5,15 +5,25 @@ class UserInterface:
     def __init__(self, session):
         self.session = session
 
-    def choose_deck(self):
-        deck_names = self.session.anki_interface.get_deck_names()
+    def choose_decks(self):
+        read_deck_name = self.choose_deck("Choose a deck to check for existing notes: ")
+        print(f"\nRead deck selected: {read_deck_name}")
+        self.session.anki_interface.read_deck_name = read_deck_name
 
-        print("\nChoose a deck:")
-        for i, deck_name in enumerate(deck_names, start=1):
+        write_deck_name = self.choose_deck("Choose a deck to add new notes to: ")
+        print(f"\nWrite deck selected: {write_deck_name}")
+        self.session.anki_interface.write_deck_name = write_deck_name
+
+    def choose_deck(self, prompt):
+        all_deck_names = self.session.anki_interface.get_all_deck_names()
+
+        print("\nAll decks:\n")
+
+        for i, deck_name in enumerate(all_deck_names, start=1):
             print(f"{i}. {deck_name}")
 
         while True:
-            user_input = input("\nEnter the number of the deck to add cards to: ")
+            user_input = input(f"\n{prompt}")
 
             try:
                 choice = int(user_input)
@@ -22,10 +32,8 @@ class UserInterface:
                 continue
 
             try:
-                deck_name = deck_names[choice - 1]
-                self.session.anki_interface.deck_name = deck_name
-                print(f"\nDeck selected: {deck_name}")
-                break
+                deck_name = all_deck_names[choice - 1]
+                return deck_name
             except:
                 print("\nInvalid choice. Please select a number from the list.")
                 continue
