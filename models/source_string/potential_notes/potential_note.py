@@ -11,11 +11,23 @@ class PotentialNote:
         self.pos = token["pos"]
         self.gender = token["gender"]
         self.number = token["number"]
-        self.exists_in_anki = False
+        self.already_exists = self.check_if_already_exists()
 
     def __repr__(self):
         front = f"front: {self.front}"
         back = f"back: {self.back}"
-        exists_in_anki = f"exists_in_anki: {self.exists_in_anki}"
+        already_exists = f"already_exists: {self.already_exists}"
 
-        return f"{front:<30}{back:<30}{exists_in_anki}"
+        return f"{front:<30}{back:<30}{already_exists}"
+
+    def check_if_already_exists(self):
+        existing_notes = self.session.anki_interface.find_notes_by_front(
+            self.front,
+        )
+
+        if existing_notes:
+            self.already_exists = True
+        else:
+            self.already_exists = False
+
+        return self.already_exists
