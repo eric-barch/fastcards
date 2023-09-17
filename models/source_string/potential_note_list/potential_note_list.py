@@ -14,9 +14,8 @@ class PotentialNoteList(list):
         self.string = string
 
         parsed_tokens = self.parse_tokens()
-        # print(f"\nparsed_tokens: {json.dumps(self.parsed_tokens, indent=4)}")
 
-        request_tokens = self.generate_request_tokens(parsed_tokens)
+        request_tokens = self.get_request_tokens(parsed_tokens)
         request = json.dumps(
             {
                 "string": self.string,
@@ -24,14 +23,11 @@ class PotentialNoteList(list):
             },
             indent=4,
         )
-        # print(f"\nrequest: {request}")
 
         translated_tokens = self.session.openai_interface.translate_tokens(request)
-        print(f"\nresponse: {json.dumps(translated_tokens, indent=4)}")
 
         self.tokens = self.set_tokens(parsed_tokens, translated_tokens)
-
-        # self.create_potential_notes()
+        print(f"\ntokens: {json.dumps(self.tokens, indent=4)}")
 
     def parse_tokens(self):
         parsed_string = nlp(self.string)
@@ -40,7 +36,7 @@ class PotentialNoteList(list):
 
         for token in parsed_string:
             if token.pos_ != "PUNCT":
-                note_front = self.determine_note_front(token)
+                note_front = self.get_note_front(token)
 
                 morph = token.morph.to_dict()
 
@@ -65,7 +61,7 @@ class PotentialNoteList(list):
 
         return parsed_tokens
 
-    def determine_note_front(self, token):
+    def get_note_front(self, token):
         is_contraction_part = token.text.endswith("'")
         is_inverted_subject_pron = token.text.startswith("-")
         is_verb = self.get_pos_string(token.pos_) == "verb"
@@ -99,6 +95,7 @@ class PotentialNoteList(list):
             "X": "other",
             "SPACE": "space",
         }
+
         return pos[abbreviation.upper()]
 
     def get_gender_string(self, abbreviation):
@@ -107,6 +104,7 @@ class PotentialNoteList(list):
             "FEM": "feminine",
             "NEUT": "neuter",
         }
+
         return gender[abbreviation.upper()]
 
     def get_number_string(self, abbreviation):
@@ -114,9 +112,10 @@ class PotentialNoteList(list):
             "SING": "singular",
             "PLUR": "plural",
         }
+
         return number[abbreviation.upper()]
 
-    def generate_request_tokens(self, parsed_tokens):
+    def get_request_tokens(self, parsed_tokens):
         request_tokens = []
 
         for token in parsed_tokens:
@@ -130,4 +129,21 @@ class PotentialNoteList(list):
         return request_tokens
 
     def set_tokens(self, parsed_tokens, translated_tokens):
-        pass
+        if len(parsed_tokens) != len(translated_tokens):
+            raise Exception(
+                "parsed_tokens and translated_tokens must be the same length"
+            )
+
+        tokens = parsed_tokens
+
+        for i, token in enumerate(tokens):
+            translated_token = translated_tokens[i]
+
+            if token["note_front"] != translated_token["note_front"]:
+                token["note_front"] = translated_token["note_front"]
+                token["pos"] = "verb"
+
+            token["english"] = translated_token["english"]
+
+        self.tokens = tokens
+        return self.tokens

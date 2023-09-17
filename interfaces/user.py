@@ -1,5 +1,3 @@
-import json
-
 from models.source_string.source_string import SourceString
 
 
@@ -15,7 +13,7 @@ class UserInterface:
             print(f"{i}. {deck_name}")
 
         while True:
-            user_input = input("\nEnter the number of the deck you want to work in: ")
+            user_input = input("\nEnter the number of the deck to add cards to: ")
 
             try:
                 choice = int(user_input)
@@ -32,7 +30,7 @@ class UserInterface:
                 print("\nInvalid choice. Please select a number from the list.")
                 continue
 
-    def request_input(self):
+    def request_string(self):
         while True:
             user_input = input(
                 "\nEnter a string in French (or type 'exit' to quit):\n\n"
