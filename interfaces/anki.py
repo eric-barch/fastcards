@@ -5,7 +5,6 @@ import urllib.request
 class AnkiInterface:
     def __init__(self, session):
         self.session = session
-        self.deck_id = None
         self.deck_name = None
         session.anki_interface = self
 
@@ -27,8 +26,8 @@ class AnkiInterface:
             raise Exception(response["error"])
         return response["result"]
 
-    def get_deck_names_and_ids(self):
-        return self.call_api("deckNamesAndIds")
+    def get_deck_names(self):
+        return self.call_api("deckNames")
 
     def check_for_note(self, word):
         query = f'deck:"{self.deck_name}" "front:{word}"'

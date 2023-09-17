@@ -6,14 +6,14 @@ class UserInterface:
         self.session = session
 
     def choose_deck(self):
-        deck_dict = self.session.anki_interface.get_deck_names_and_ids()
+        deck_names = self.session.anki_interface.get_deck_names()
 
         print("\nChoose a deck:")
-        for i, (deck_name, deck_id) in enumerate(deck_dict.items(), 1):
-            print(f"{i}. {deck_name} (ID: {deck_id})")
+        for i, deck_name in enumerate(deck_names, start=1):
+            print(f"{i}. {deck_name}")
 
         while True:
-            user_input = input("\nEnter the number of the deck you want to work in: ")
+            user_input = input("\nEnter the number of the deck to add cards to: ")
 
             try:
                 choice = int(user_input)
@@ -22,17 +22,15 @@ class UserInterface:
                 continue
 
             try:
-                deck_id = deck_dict[deck_name]
-                deck_name = list(deck_dict.keys())[choice - 1]
-                self.session.anki_interface.deck_id = deck_id
+                deck_name = deck_names[choice - 1]
                 self.session.anki_interface.deck_name = deck_name
-                print(f"\nDeck selected: {deck_name} (ID: {deck_id})")
+                print(f"\nDeck selected: {deck_name}")
                 break
             except:
                 print("\nInvalid choice. Please select a number from the list.")
                 continue
 
-    def request_input(self):
+    def request_string(self):
         while True:
             user_input = input(
                 "\nEnter a string in French (or type 'exit' to quit):\n\n"

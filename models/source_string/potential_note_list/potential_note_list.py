@@ -1,43 +1,39 @@
 import json
 import spacy
 
-from .potential_note import PotentialNote
-
 nlp = spacy.load("fr_core_news_sm")
 
 
 class PotentialNoteList(list):
-    def __init__(self, session, french_string):
+    def __init__(self, session, string):
         super().__init__()
         self.session = session
-        self.french_string = french_string
+        self.string = string
 
-        self.tokens = self.generate_tokens(self.french_string)
-        print(f"\ntokens: {json.dumps(self.tokens, indent=4)}")
+        parsed_tokens = self.parse_tokens()
 
-        request_tokens = self.generate_request_tokens()
+        request_tokens = self.get_request_tokens(parsed_tokens)
         request = json.dumps(
             {
-                "string": self.french_string,
+                "string": self.string,
                 "tokens": request_tokens,
             },
             indent=4,
         )
-        print(f"\nrequest: {request}")
 
-        response = self.session.openai_interface.confirm_tokens(request)
-        print(f"\nresponse: {json.dumps(response, indent=4)}")
+        translated_tokens = self.session.openai_interface.translate_tokens(request)
 
-        # self.create_potential_notes()
+        self.tokens = self.set_tokens(parsed_tokens, translated_tokens)
+        print(f"\ntokens: {json.dumps(self.tokens, indent=4)}")
 
-    def generate_tokens(self, french_string):
-        string = nlp(french_string)
+    def parse_tokens(self):
+        parsed_string = nlp(self.string)
 
-        token_data = []
+        parsed_tokens = []
 
-        for token in string:
+        for token in parsed_string:
             if token.pos_ != "PUNCT":
-                note_front = self.determine_note_front(token)
+                note_front = self.get_note_front(token)
 
                 morph = token.morph.to_dict()
 
@@ -47,7 +43,7 @@ class PotentialNoteList(list):
                 number_abbr = morph.get("Number")
                 number = self.get_number_string(number_abbr) if number_abbr else None
 
-                token_datum = {
+                parsed_token = {
                     "note_front": note_front,
                     "representation": token.text,
                     "start": token.idx,
@@ -58,11 +54,11 @@ class PotentialNoteList(list):
                     "number": number,
                 }
 
-                token_data.append(token_datum)
+                parsed_tokens.append(parsed_token)
 
-        return token_data
+        return parsed_tokens
 
-    def determine_note_front(self, token):
+    def get_note_front(self, token):
         is_contraction_part = token.text.endswith("'")
         is_inverted_subject_pron = token.text.startswith("-")
         is_verb = self.get_pos_string(token.pos_) == "verb"
@@ -73,19 +69,6 @@ class PotentialNoteList(list):
             return token.lemma_
 
         return token.text
-
-    def generate_request_tokens(self):
-        request_token_data = []
-
-        for token_datum in self.tokens:
-            request_token_datum = {
-                "representation": token_datum["representation"],
-                "note_front": token_datum["note_front"],
-                "pos": token_datum["pos"],
-            }
-            request_token_data.append(request_token_datum)
-
-        return request_token_data
 
     def get_pos_string(self, abbreviation):
         pos = {
@@ -109,6 +92,7 @@ class PotentialNoteList(list):
             "X": "other",
             "SPACE": "space",
         }
+
         return pos[abbreviation.upper()]
 
     def get_gender_string(self, abbreviation):
@@ -117,6 +101,7 @@ class PotentialNoteList(list):
             "FEM": "feminine",
             "NEUT": "neuter",
         }
+
         return gender[abbreviation.upper()]
 
     def get_number_string(self, abbreviation):
@@ -124,11 +109,38 @@ class PotentialNoteList(list):
             "SING": "singular",
             "PLUR": "plural",
         }
+
         return number[abbreviation.upper()]
 
-    def create_potential_notes(self):
-        for token_datum in self.tokens:
-            potential_note = PotentialNote(
-                self.session, self.french_string, token_datum
+    def get_request_tokens(self, parsed_tokens):
+        request_tokens = []
+
+        for token in parsed_tokens:
+            request_token = {
+                "representation": token["representation"],
+                "note_front": token["note_front"],
+                "pos": token["pos"],
+            }
+            request_tokens.append(request_token)
+
+        return request_tokens
+
+    def set_tokens(self, parsed_tokens, translated_tokens):
+        if len(parsed_tokens) != len(translated_tokens):
+            raise Exception(
+                "parsed_tokens and translated_tokens must be the same length"
             )
-            self.append(potential_note)
+
+        tokens = parsed_tokens
+
+        for i, token in enumerate(tokens):
+            translated_token = translated_tokens[i]
+
+            if token["note_front"] != translated_token["note_front"]:
+                token["note_front"] = translated_token["note_front"]
+                token["pos"] = "verb"
+
+            token["english"] = translated_token["english"]
+
+        self.tokens = tokens
+        return self.tokens
