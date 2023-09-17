@@ -1,4 +1,4 @@
-from .potential_note_list.potential_note_list import PotentialNoteList
+from .potential_notes.potential_notes import PotentialNotes
 
 
 class SourceString:
@@ -16,9 +16,9 @@ class SourceString:
         print(f"\nfrench_string: {self.french_string}")
 
         self.english_string = french_and_english_strings["english"]
-        print(f"english_string: {self.english_string}\n")
+        print(f"english_string: {self.english_string}")
 
-        self.potential_note_list = PotentialNoteList(
+        self.potential_notes = PotentialNotes(
             self.session,
             self.french_string,
         )
