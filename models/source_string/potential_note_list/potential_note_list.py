@@ -1,8 +1,5 @@
 import json
-
 import spacy
-
-from .potential_note import PotentialNote
 
 nlp = spacy.load("fr_core_news_sm")
 
