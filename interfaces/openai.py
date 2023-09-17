@@ -46,42 +46,72 @@ class OpenAiInterface:
         response_obj = json.loads(response_str)
         return response_obj
 
-    def translate_tokens_system_prompt(self):
+    def confirm_tokens_system_prompt(self):
         return """
-            You will receive a JSON request object formatted as follows:
+            You will receive a JSON object formatted as follows:
 
             {
                 "string": a French string,
                 "tokens": an array of JSON objects representing the tokens in "string" in exact order
             }
-
-            Your job is to return a JSON array with a response object for each "token" in "tokens". 
-            Each "token" will be formatted as follows:
+ 
+            Each "token" within "tokens" will be formatted as follows:
 
             {
-                "representation": the exact way the token is represented in "string",
+                "representation": the exact way the token appears in "string",
                 "note_front": a "generalized" form of "representation" (may be the original "representation" or its lemma),
                 "pos": the part of speech "token" is functioning as in the string
             }
 
-            Analyze each "token" in the context of "string". If "token" is functioning as a verb, 
-            and "pos" is not ALREADY "verb", return the following:
+            Your job is to confirm that the "note_front" and "pos" fields are correct and provide 
+            an English translation. Analyze each token in the context of the full string and return 
+            an array of JSON objects formatted as follows for each "token":
 
             {
-                "note_front": the infinitive form of the verb you have determined "token" to be,
-                "english": the English translation of "note_front",
+                "note_front": string,
+                "note_back": string,
+                "pos": string,
             }
 
-            Otherwise, if "pos" is already "verb", or if "token" is functioning as any other part 
-            of speech, return the following:
+            "note_front":
+                -   Should usually be the same as "token"'s "representation" unless:
+                    -   "token" is part of a contraction (usually ending in "'"), or is an inverted 
+                        subject pronoun (usually starting with "-"). In this case, "note_front" 
+                        should be "token"'s lemma.
+                    -   "token" is functioning as a verb in the original string. In this case, 
+                        "note_front" should be the infinitive form of "token".
+                -   If "token" is a proper noun in the original string, "note_front" should be
+                    capitalized. Otherwise, "note_front" should be lowercase.
 
-            {
-                "note_front": the "note_front" from the request,
-                "english": the English translation of "note_front"
-            }
+            "note_back":
+                -   English verb translations should usually be preceded by "to" (e.g. "to be",
+                    "to have"). 
+                -   Case should match the case of "note_front".
 
-            English verb translations should usually be preceded by "to" (e.g. "to be", "to have").
-
+            "pos":
+                -   Make sure the token is actually functioning as the "pos" in the request object.
+                    If it is not, return the correct "pos".
+                -   Choose from the following options:
+                        "adjective",
+                        "adposition",
+                        "adverb",
+                        "auxiliary",
+                        "conjunction",
+                        "coord conj",
+                        "determiner",
+                        "interjection",
+                        "noun",
+                        "numeral",
+                        "particle",
+                        "pronoun",
+                        "proper noun",
+                        "punctuation",
+                        "subord conj",
+                        "symbol",
+                        "verb",
+                        "other",
+                        "space"
+                
             With contractions, pay careful attention to which token within the contraction is
             referenced. For example:
 
@@ -106,11 +136,13 @@ class OpenAiInterface:
                 ..., // other "token"s
                 {
                     "note_front": "de", // from "d'" in "d'avaler"
-                    "english": "of"
+                    "note_back": "of",
+                    "pos": "preposition"
                 },
                 {
                     "note_front": "avaler", // from "avaler" in "d'avaler"
-                    "english": "to swallow"
+                    "note_back": "to swallow",
+                    "pos": "verb"
                 }
                 ... // other "token"s
             ]
@@ -118,18 +150,20 @@ class OpenAiInterface:
                 ..., // other "token"s
                 {
                     "note_front": "avaler", // from "avaler" in "d'avaler" - should be "de"
-                    "english": "to swallow"
+                    "note_back": "to swallow",
+                    "pos": "verb"
                 },
                 {
                     "note_front": "avaler", // from "avaler" in "d'avaler" again - technically correct in this position, but redundant because of mistake above
-                    "english": "to swallow"
+                    "note_back": "to swallow",
+                    "pos": "verb"
                 }
                 ... // other "token"s
             ]
         """
 
-    def translate_tokens(self, input):
-        system_prompt = self.translate_tokens_system_prompt()
+    def confirm_tokens(self, input):
+        system_prompt = self.confirm_tokens_system_prompt()
         response_str = self.call_api(system_prompt, input)
         response_obj = json.loads(response_str)
         return response_obj

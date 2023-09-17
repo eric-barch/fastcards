@@ -24,9 +24,9 @@ class PotentialNotes:
             indent=4,
         )
 
-        translated_tokens = self.session.openai_interface.translate_tokens(request)
+        confirmed_tokens = self.session.openai_interface.confirm_tokens(request)
 
-        self.tokens = self.set_tokens(parsed_tokens, translated_tokens)
+        self.tokens = self.set_tokens(parsed_tokens, confirmed_tokens)
         self.potential_notes = self.create_potential_notes()
 
         print(self)
@@ -79,13 +79,19 @@ class PotentialNotes:
         is_contraction_part = token.text.endswith("'")
         is_inverted_subject_pron = token.text.startswith("-")
         is_verb = self.get_pos_string(token.pos_) == "verb"
+        is_proper_noun = self.get_pos_string(token.pos_) == "proper noun"
 
         lemma_front = is_contraction_part or is_inverted_subject_pron or is_verb
 
         if lemma_front:
-            return token.lemma_
+            note_front = token.lemma_
+        else:
+            note_front = token.text
 
-        return token.text
+        if is_proper_noun:
+            return note_front.capitalize()
+        else:
+            return note_front.lower()
 
     def get_pos_string(self, abbreviation):
         pos = {
@@ -142,22 +148,20 @@ class PotentialNotes:
 
         return request_tokens
 
-    def set_tokens(self, parsed_tokens, translated_tokens):
-        if len(parsed_tokens) != len(translated_tokens):
+    def set_tokens(self, parsed_tokens, confirmed_tokens):
+        if len(parsed_tokens) != len(confirmed_tokens):
             raise Exception(
-                "parsed_tokens and translated_tokens must be the same length"
+                "parsed_tokens and confirmed_tokens must be the same length"
             )
 
         tokens = parsed_tokens
 
         for i, token in enumerate(tokens):
-            translated_token = translated_tokens[i]
+            confirmed_token = confirmed_tokens[i]
 
-            if token["note_front"] != translated_token["note_front"]:
-                token["note_front"] = translated_token["note_front"]
-                token["pos"] = "verb"
-
-            token["english"] = translated_token["english"]
+            token["note_front"] = confirmed_token["note_front"]
+            token["note_back"] = confirmed_token["note_back"]
+            token["pos"] = confirmed_token["pos"]
 
         self.tokens = tokens
         return self.tokens
