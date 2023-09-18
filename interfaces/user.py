@@ -26,18 +26,23 @@ class UserInterface:
         while True:
             user_input = input(f"\n{prompt}")
 
-            try:
-                choice = int(user_input)
-            except:
-                print("\nPlease enter a valid number.")
-                continue
+            result = self.validate_deck_name_input(user_input, len(all_deck_names))
 
-            try:
-                deck_name = all_deck_names[choice - 1]
-                return deck_name
-            except:
-                print("\nInvalid choice. Please select a number from the list.")
-                continue
+            if result:
+                return result
+
+    def validate_deck_name_input(self, user_input, max_value):
+        try:
+            choice = int(user_input)
+        except:
+            print("\nPlease enter a valid number.")
+            return None
+
+        if choice < 1 or choice > max_value:
+            print(f"\nInvalid choice. Please select a number from the list.")
+            return None
+
+        return choice
 
     def request_source_language_string(self):
         user_input = input(
@@ -56,13 +61,12 @@ class UserInterface:
                 "(or type 'a' to create a note for all non-existent, non-proper nouns):\n\n"
             )
 
-            result = self.validate_new_notes_input(user_input)
+            result = self.validate_new_notes_input(user_input, len(potential_notes))
+
             if result:
                 return result
 
-    def validate_new_notes_input(self, user_input):
-        max_value = len(self.session.source_string.potential_notes)
-
+    def validate_new_notes_input(self, user_input, max_value):
         if user_input.lower().strip() == "a":
             return "a"
 
@@ -73,7 +77,7 @@ class UserInterface:
             if any(i < 1 or i > max_value for i in user_input_indices):
                 print(
                     f"\nInvalid. One or more of your choices falls outside the range of "
-                    f"Potential New Notes (1-{max_value})."
+                    f"Potential Notes (1-{max_value})."
                 )
                 return None
 
@@ -81,7 +85,7 @@ class UserInterface:
 
         except ValueError:
             print(
-                "\nPlease enter either 'a' or a comma-separated list of integers specifying "
-                "the new notes you want to create."
+                "\nPlease enter 'a' or a comma-separated list of integers specifying the new notes "
+                "you want to create."
             )
             return None
