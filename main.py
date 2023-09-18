@@ -1,5 +1,6 @@
 from models.session import Session
-from models.source_string.source_string import SourceString
+from models.text.text import Text
+from models.text.notes.notes import Notes
 
 
 def main():
@@ -8,27 +9,31 @@ def main():
     exit = False
 
     while not exit:
-        restart = False
-
-        read_deck_name, write_deck_name = session.user_interface.request_deck_names()
+        read_deck_name, write_deck_name = session.user_interface.select_deck_names()
         session.anki_interface.read_deck_name = read_deck_name
         session.anki_interface.write_deck_name = write_deck_name
 
-        while not restart:
-            user_input = session.user_interface.request_source_language_string()
+        restart = False
 
-            if user_input.lower().strip() == "restart":
+        while not restart:
+            text = session.user_interface.enter_text()
+
+            if text.lower().strip() == "restart":
                 restart = True
                 break
 
-            if user_input.lower().strip() == "exit":
+            if text.lower().strip() == "exit":
                 exit = True
                 break
 
-            session.source_string = SourceString(session, user_input)
-            session.potential_new_notes = PotentialNewNotes(session)
+            session.text = Text(session, text)
+            session.notes = Notes(session)
 
-            user_input = session.user_interface.request_new_notes()
+            selected_note_indices = session.user_interface.select_new_notes()
+
+            print(f"\nAdding these notes:\n")
+            for selected_note_index in selected_note_indices:
+                print(session.notes[selected_note_index])
 
 
 if __name__ == "__main__":

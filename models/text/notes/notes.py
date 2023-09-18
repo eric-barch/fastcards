@@ -2,16 +2,18 @@ import json
 
 import spacy
 
-from .potential_new_note import PotentialNote
+from .note import Note
 
 nlp = spacy.load("fr_core_news_sm")
 
 
-class PotentialNotes(list):
+class Notes(list):
     def __init__(self, session):
         super().__init__()
         self.session = session
-        self.string = string
+
+        self.string = session.text.source
+        session.text.notes = self
 
         parsed_tokens = self.parse_tokens()
 
@@ -27,14 +29,14 @@ class PotentialNotes(list):
         confirmed_tokens = self.session.openai_interface.confirm_tokens(request)
 
         self.tokens = self.set_tokens(parsed_tokens, confirmed_tokens)
-        self.create_potential_notes()
+        self.create_notes()
 
     def __repr__(self):
         repr = "\n"
 
-        for i, potential_note in enumerate(self):
+        for i, note in enumerate(self):
             number = f"{i + 1}."
-            repr += f"{number:<5}{potential_note}"
+            repr += f"{number:<5}{note}"
 
             if i != len(self) - 1:
                 repr += "\n"
@@ -164,13 +166,13 @@ class PotentialNotes(list):
         self.tokens = tokens
         return self.tokens
 
-    def create_potential_notes(self):
+    def create_notes(self):
         for token in self.tokens:
-            potential_note = PotentialNote(
+            note = Note(
                 self.session,
                 self.string,
                 token,
             )
-            self.append(potential_note)
+            self.append(note)
 
         return self

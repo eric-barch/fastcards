@@ -2,7 +2,7 @@ class UserInterface:
     def __init__(self, session):
         self.session = session
 
-    def request_deck_names(self):
+    def select_deck_names(self):
         read_deck_name = self.request_deck_name(
             "Choose a deck to read for existing notes: "
         )
@@ -44,16 +44,16 @@ class UserInterface:
 
         return choice
 
-    def request_source_language_string(self):
+    def enter_text(self):
         user_input = input(
-            "\nEnter a string in Source ('restart' to change decks, 'exit' to quit):\n\n"
+            "\nEnter a string in the source language ('restart' to change decks, 'exit' to quit):\n\n"
         )
         return user_input
 
-    def request_new_notes(self):
-        potential_notes = self.session.source_string.potential_notes
+    def select_new_notes(self):
+        notes = self.session.text.notes
 
-        print(f"\nPotential Notes: {potential_notes}")
+        print(f"\nExtracted notes: {notes}")
 
         while True:
             user_input = input(
@@ -61,10 +61,20 @@ class UserInterface:
                 "(or type 'a' to create a note for all non-existent, non-proper nouns):\n\n"
             )
 
-            result = self.validate_new_notes_input(user_input, len(potential_notes))
+            result = self.validate_new_notes_input(user_input, len(notes))
 
             if result:
-                return result
+                note_indices = []
+
+                if result == "a":
+                    for i, note in enumerate(notes):
+                        note_indices.append(i)
+                else:
+                    for note_number in result:
+                        note_index = note_number - 1
+                        note_indices.append(note_index)
+
+                return note_indices
 
     def validate_new_notes_input(self, user_input, max_value):
         if user_input.lower().strip() == "a":
@@ -77,7 +87,7 @@ class UserInterface:
             if any(i < 1 or i > max_value for i in user_input_indices):
                 print(
                     f"\nInvalid. One or more of your choices falls outside the range of "
-                    f"Potential Notes (1-{max_value})."
+                    f"Notes (1-{max_value})."
                 )
                 return None
 

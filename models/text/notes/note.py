@@ -1,4 +1,4 @@
-class PotentialNote:
+class Note:
     def __init__(self, session, string, token):
         self.session = session
         self.string = string
