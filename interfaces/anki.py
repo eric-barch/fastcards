@@ -2,10 +2,10 @@ import json
 import urllib.request
 
 
-class AnkiInterface:
+class Anki:
     def __init__(self, session):
         self.session = session
-        session.anki_interface = self
+        session.anki = self
         self.read_deck_name = None
         self.write_deck_name = None
 
@@ -38,14 +38,37 @@ class AnkiInterface:
             query=query,
         )
 
-    def add_note(self, front_content, back_content):
+    def add_note(self, note):
+        if note.gender == None:
+            gender = "none"
+        else:
+            gender = note.gender
+
+        if note.number == None:
+            number = "none"
+        else:
+            number = note.number
+
         return self.call_api(
             "addNote",
             note={
-                "deckName": "Français::Harry Potter à l'école des sorciers",
-                "modelName": "Basic",
-                "fields": {"Front": front_content, "Back": back_content},
+                "deckName": self.write_deck_name,
+                "modelName": "Forward and Reverse with Grammatical Detail (Type Answer)",
+                "fields": {
+                    "Front": note.front,
+                    "Back": note.back,
+                    "Part of Speech": note.pos,
+                    "Gender": gender,
+                    "Number": number,
+                },
                 "options": {"allowDuplicate": False},
                 "tags": [],
             },
         )
+
+    def add_notes(self, selected_note_indices):
+        for selected_note_index in selected_note_indices:
+            note = self.session.notes[selected_note_index]
+            self.add_note(
+                note,
+            )

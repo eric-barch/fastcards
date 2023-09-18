@@ -5,12 +5,12 @@ import openai
 from dotenv import load_dotenv
 
 
-class OpenAiInterface:
+class OpenAi:
     def __init__(self, session):
         load_dotenv()
         openai.api_key = os.getenv("OPENAI_API_KEY")
         self.session = session
-        session.openai_interface = self
+        session.openai = self
 
     def call_api(self, systemPrompt: str, string: str):
         response = openai.ChatCompletion.create(
@@ -59,34 +59,34 @@ class OpenAiInterface:
 
             {
                 "representation": the exact way the token appears in "string",
-                "note_front": a "generalized" form of "representation" (may be the original "representation" or its lemma),
+                "front": a "generalized" form of "representation" (may be the original "representation" or its lemma),
                 "pos": the part of speech "token" is functioning as in the string
             }
 
-            Your job is to confirm that the "note_front" and "pos" fields are correct and provide 
+            Your job is to confirm that the "front" and "pos" fields are correct and provide 
             an Target translation. Analyze each token in the context of the full string and return 
             an array of JSON objects formatted as follows for each "token":
 
             {
-                "note_front": string,
-                "note_back": string,
+                "front": string,
+                "back": string,
                 "pos": string,
             }
 
-            "note_front":
+            "front":
                 -   Should usually be the same as "token"'s "representation" unless:
                     -   "token" is part of a contraction (usually ending in "'"), or is an inverted 
-                        subject pronoun (usually starting with "-"). In this case, "note_front" 
+                        subject pronoun (usually starting with "-"). In this case, "front" 
                         should be "token"'s lemma.
                     -   "token" is functioning as a verb in the original string. In this case, 
-                        "note_front" should be the infinitive form of "token".
-                -   If "token" is a proper noun in the original string, "note_front" should be
-                    capitalized. Otherwise, "note_front" should be lowercase.
+                        "front" should be the infinitive form of "token".
+                -   If "token" is a proper noun in the original string, "front" should be
+                    capitalized. Otherwise, "front" should be lowercase.
 
-            "note_back":
+            "back":
                 -   Target verb translations should usually be preceded by "to" (e.g. "to be",
                     "to have"). 
-                -   Case should match the case of "note_front".
+                -   Case should match the case of "front".
 
             "pos":
                 -   Make sure the token is actually functioning as the "pos" in the request object.
@@ -121,12 +121,12 @@ class OpenAiInterface:
                     ..., // other "token"s
                     {
                         "representation": "d'".
-                        "note_front": "de",
+                        "front": "de",
                         "pos": "preposition"
                     },
                     {
                         "representation": "avaler",
-                        "note_front": "avaler",
+                        "front": "avaler",
                         "pos": "verb"
                     }
                     ... // other "token"s
@@ -135,13 +135,13 @@ class OpenAiInterface:
             Correct output: [
                 ..., // other "token"s
                 {
-                    "note_front": "de", // from "d'" in "d'avaler"
-                    "note_back": "of",
+                    "front": "de", // from "d'" in "d'avaler"
+                    "back": "of",
                     "pos": "preposition"
                 },
                 {
-                    "note_front": "avaler", // from "avaler" in "d'avaler"
-                    "note_back": "to swallow",
+                    "front": "avaler", // from "avaler" in "d'avaler"
+                    "back": "to swallow",
                     "pos": "verb"
                 }
                 ... // other "token"s
@@ -149,13 +149,13 @@ class OpenAiInterface:
             Incorrect output: [
                 ..., // other "token"s
                 {
-                    "note_front": "avaler", // from "avaler" in "d'avaler" - should be "de"
-                    "note_back": "to swallow",
+                    "front": "avaler", // from "avaler" in "d'avaler" - should be "de"
+                    "back": "to swallow",
                     "pos": "verb"
                 },
                 {
-                    "note_front": "avaler", // from "avaler" in "d'avaler" again - technically correct in this position, but redundant because of mistake above
-                    "note_back": "to swallow",
+                    "front": "avaler", // from "avaler" in "d'avaler" again - technically correct in this position, but redundant because of mistake above
+                    "back": "to swallow",
                     "pos": "verb"
                 }
                 ... // other "token"s
