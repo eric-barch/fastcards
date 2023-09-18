@@ -50,7 +50,7 @@ class UserInterface:
         )
         return user_input
 
-    def select_new_notes(self):
+    def select_notes(self):
         notes = self.session.text.notes
 
         print(f"\nExtracted notes: {notes}")

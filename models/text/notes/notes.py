@@ -12,7 +12,7 @@ class Notes(list):
         super().__init__()
         self.session = session
 
-        self.string = session.text.source
+        self.source = session.text.source
         session.text.notes = self
 
         parsed_tokens = self.parse_tokens()
@@ -20,7 +20,7 @@ class Notes(list):
         request_tokens = self.get_request_tokens(parsed_tokens)
         request = json.dumps(
             {
-                "string": self.string,
+                "string": self.source,
                 "tokens": request_tokens,
             },
             indent=4,
@@ -44,13 +44,13 @@ class Notes(list):
         return repr
 
     def parse_tokens(self):
-        parsed_string = nlp(self.string)
+        parsed_string = nlp(self.source)
 
         parsed_tokens = []
 
         for token in parsed_string:
             if token.pos_ != "PUNCT":
-                note_front = self.get_note_front(token)
+                front = self.get_front(token)
 
                 morph = token.morph.to_dict()
 
@@ -61,7 +61,7 @@ class Notes(list):
                 number = self.get_number_string(number_abbr) if number_abbr else None
 
                 parsed_token = {
-                    "note_front": note_front,
+                    "front": front,
                     "representation": token.text,
                     "start": token.idx,
                     "end": token.idx + len(token.text),
@@ -75,7 +75,7 @@ class Notes(list):
 
         return parsed_tokens
 
-    def get_note_front(self, token):
+    def get_front(self, token):
         is_contraction_part = token.text.endswith("'")
         is_inverted_subject_pron = token.text.startswith("-")
         is_verb = self.get_pos_string(token.pos_) == "verb"
@@ -84,14 +84,14 @@ class Notes(list):
         lemma_front = is_contraction_part or is_inverted_subject_pron or is_verb
 
         if lemma_front:
-            note_front = token.lemma_
+            front = token.lemma_
         else:
-            note_front = token.text
+            front = token.text
 
         if is_proper_noun:
-            return note_front.capitalize()
+            return front.capitalize()
         else:
-            return note_front.lower()
+            return front.lower()
 
     def get_pos_string(self, abbreviation):
         pos = {
@@ -141,7 +141,7 @@ class Notes(list):
         for token in parsed_tokens:
             request_token = {
                 "representation": token["representation"],
-                "note_front": token["note_front"],
+                "front": token["front"],
                 "pos": token["pos"],
             }
             request_tokens.append(request_token)
@@ -159,8 +159,8 @@ class Notes(list):
         for i, token in enumerate(tokens):
             confirmed_token = confirmed_tokens[i]
 
-            token["note_front"] = confirmed_token["note_front"]
-            token["note_back"] = confirmed_token["note_back"]
+            token["front"] = confirmed_token["front"]
+            token["back"] = confirmed_token["back"]
             token["pos"] = confirmed_token["pos"]
 
         self.tokens = tokens
@@ -170,7 +170,7 @@ class Notes(list):
         for token in self.tokens:
             note = Note(
                 self.session,
-                self.string,
+                self.source,
                 token,
             )
             self.append(note)
