@@ -26,6 +26,7 @@ def main():
                 break
 
             session.source_string = SourceString(session, user_input)
+            session.potential_new_notes = PotentialNewNotes(session)
 
             user_input = session.user_interface.request_new_notes()
 

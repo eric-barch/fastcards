@@ -46,7 +46,7 @@ class UserInterface:
 
     def request_source_language_string(self):
         user_input = input(
-            "\nEnter a string in French ('restart' to change decks, 'exit' to quit):\n\n"
+            "\nEnter a string in Source ('restart' to change decks, 'exit' to quit):\n\n"
         )
         return user_input
 

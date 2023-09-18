@@ -1,24 +1,14 @@
-from .potential_notes.potential_notes import PotentialNotes
-
-
 class SourceString:
     def __init__(self, session, user_input):
         self.session = session
         self.user_input = user_input
 
-        french_and_english_strings = (
-            self.session.openai_interface.get_french_and_english_strings(
-                self.user_input
-            )
+        source_and_target_strings = (
+            self.session.openai_interface.get_source_and_target_strings(self.user_input)
         )
 
-        self.french_string = french_and_english_strings["french"]
-        print(f"\nfrench_string: {self.french_string}")
+        self.source_string = source_and_target_strings["source"]
+        print(f"\nsource_string: {self.source_string}")
 
-        self.english_string = french_and_english_strings["english"]
-        print(f"english_string: {self.english_string}")
-
-        self.potential_notes = PotentialNotes(
-            self.session,
-            self.french_string,
-        )
+        self.target_string = source_and_target_strings["target"]
+        print(f"target_string: {self.target_string}")
