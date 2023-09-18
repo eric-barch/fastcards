@@ -1,14 +1,19 @@
 import json
+
 import spacy
+
+from .note import Note
 
 nlp = spacy.load("fr_core_news_sm")
 
 
-class PotentialNoteList(list):
-    def __init__(self, session, string):
+class Notes(list):
+    def __init__(self, session):
         super().__init__()
         self.session = session
-        self.string = string
+
+        self.string = session.text.source
+        session.text.notes = self
 
         parsed_tokens = self.parse_tokens()
 
@@ -21,10 +26,22 @@ class PotentialNoteList(list):
             indent=4,
         )
 
-        translated_tokens = self.session.openai_interface.translate_tokens(request)
+        confirmed_tokens = self.session.openai_interface.confirm_tokens(request)
 
-        self.tokens = self.set_tokens(parsed_tokens, translated_tokens)
-        print(f"\ntokens: {json.dumps(self.tokens, indent=4)}")
+        self.tokens = self.set_tokens(parsed_tokens, confirmed_tokens)
+        self.create_notes()
+
+    def __repr__(self):
+        repr = "\n"
+
+        for i, note in enumerate(self):
+            number = f"{i + 1}."
+            repr += f"{number:<5}{note}"
+
+            if i != len(self) - 1:
+                repr += "\n"
+
+        return repr
 
     def parse_tokens(self):
         parsed_string = nlp(self.string)
@@ -62,13 +79,19 @@ class PotentialNoteList(list):
         is_contraction_part = token.text.endswith("'")
         is_inverted_subject_pron = token.text.startswith("-")
         is_verb = self.get_pos_string(token.pos_) == "verb"
+        is_proper_noun = self.get_pos_string(token.pos_) == "proper noun"
 
         lemma_front = is_contraction_part or is_inverted_subject_pron or is_verb
 
         if lemma_front:
-            return token.lemma_
+            note_front = token.lemma_
+        else:
+            note_front = token.text
 
-        return token.text
+        if is_proper_noun:
+            return note_front.capitalize()
+        else:
+            return note_front.lower()
 
     def get_pos_string(self, abbreviation):
         pos = {
@@ -125,22 +148,31 @@ class PotentialNoteList(list):
 
         return request_tokens
 
-    def set_tokens(self, parsed_tokens, translated_tokens):
-        if len(parsed_tokens) != len(translated_tokens):
+    def set_tokens(self, parsed_tokens, confirmed_tokens):
+        if len(parsed_tokens) != len(confirmed_tokens):
             raise Exception(
-                "parsed_tokens and translated_tokens must be the same length"
+                "parsed_tokens and confirmed_tokens must be the same length"
             )
 
         tokens = parsed_tokens
 
         for i, token in enumerate(tokens):
-            translated_token = translated_tokens[i]
+            confirmed_token = confirmed_tokens[i]
 
-            if token["note_front"] != translated_token["note_front"]:
-                token["note_front"] = translated_token["note_front"]
-                token["pos"] = "verb"
-
-            token["english"] = translated_token["english"]
+            token["note_front"] = confirmed_token["note_front"]
+            token["note_back"] = confirmed_token["note_back"]
+            token["pos"] = confirmed_token["pos"]
 
         self.tokens = tokens
         return self.tokens
+
+    def create_notes(self):
+        for token in self.tokens:
+            note = Note(
+                self.session,
+                self.string,
+                token,
+            )
+            self.append(note)
+
+        return self

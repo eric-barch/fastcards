@@ -5,8 +5,9 @@ import urllib.request
 class AnkiInterface:
     def __init__(self, session):
         self.session = session
-        self.deck_name = None
         session.anki_interface = self
+        self.read_deck_name = None
+        self.write_deck_name = None
 
     def call_api(self, action, **params):
         request = {"action": action, "params": params, "version": 6}
@@ -26,11 +27,11 @@ class AnkiInterface:
             raise Exception(response["error"])
         return response["result"]
 
-    def get_deck_names(self):
+    def get_all_deck_names(self):
         return self.call_api("deckNames")
 
-    def check_for_note(self, word):
-        query = f'deck:"{self.deck_name}" "front:{word}"'
+    def find_notes_by_front(self, front):
+        query = f'deck:"{self.read_deck_name}" "front:{front}"'
 
         return self.call_api(
             "findNotes",
