@@ -9,14 +9,14 @@ def main():
     exit = False
 
     while not exit:
-        read_deck_name, write_deck_name = session.user_interface.select_deck_names()
-        session.anki_interface.read_deck_name = read_deck_name
-        session.anki_interface.write_deck_name = write_deck_name
+        read_deck_name, write_deck_name = session.user.select_deck_names()
+        session.anki.read_deck_name = read_deck_name
+        session.anki.write_deck_name = write_deck_name
 
         restart = False
 
         while not restart:
-            text = session.user_interface.enter_text()
+            text = session.user.enter_text()
 
             if text.lower().strip() == "restart":
                 restart = True
@@ -29,8 +29,8 @@ def main():
             session.text = Text(session, text)
             session.notes = Notes(session)
 
-            selected_note_indices = session.user_interface.select_notes()
-            session.anki_interface.add_notes(selected_note_indices)
+            selected_note_indices = session.user.select_notes()
+            session.anki.add_notes(selected_note_indices)
 
 
 if __name__ == "__main__":

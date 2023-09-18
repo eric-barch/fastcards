@@ -2,10 +2,10 @@ import json
 import urllib.request
 
 
-class AnkiInterface:
+class Anki:
     def __init__(self, session):
         self.session = session
-        session.anki_interface = self
+        session.anki = self
         self.read_deck_name = None
         self.write_deck_name = None
 
