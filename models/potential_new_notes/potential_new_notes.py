@@ -2,13 +2,13 @@ import json
 
 import spacy
 
-from .potential_note import PotentialNote
+from .potential_new_note import PotentialNote
 
 nlp = spacy.load("fr_core_news_sm")
 
 
 class PotentialNotes(list):
-    def __init__(self, session, string):
+    def __init__(self, session):
         super().__init__()
         self.session = session
         self.string = string

@@ -25,23 +25,23 @@ class OpenAiInterface:
         )
         return response.choices[0].message.content
 
-    def get_french_and_english_strings_system_prompt(self):
+    def get_source_and_target_strings_system_prompt(self):
         return """
-            You will receive a string in French. Return a JSON object with a "french" field, 
+            You will receive a string in Source. Return a JSON object with a "source" field, 
             containing a cleaned up version of the input string (correct misspellings, accents, 
-            etc.), and an "english" field, containing the English translation of "french".
+            etc.), and an "target" field, containing the Target translation of "source".
 
             Example:
 
             Input: Vous netes pas oblige, dit-il. Je le sais bien, mais je veux t'offrir un animal.
             Output: {
-                "french": "Vous n'êtes pas obligé, dit-il. Je le sais bien, mais je veux t'offrir un animal.",
-                "english": "You are not obliged, he said. I know, but I want to give you an animal."
+                "source": "Vous n'êtes pas obligé, dit-il. Je le sais bien, mais je veux t'offrir un animal.",
+                "target": "You are not obliged, he said. I know, but I want to give you an animal."
             }
         """
 
-    def get_french_and_english_strings(self, input):
-        system_prompt = self.get_french_and_english_strings_system_prompt()
+    def get_source_and_target_strings(self, input):
+        system_prompt = self.get_source_and_target_strings_system_prompt()
         response_str = self.call_api(system_prompt, input)
         response_obj = json.loads(response_str)
         return response_obj
@@ -51,7 +51,7 @@ class OpenAiInterface:
             You will receive a JSON object formatted as follows:
 
             {
-                "string": a French string,
+                "string": a Source string,
                 "tokens": an array of JSON objects representing the tokens in "string" in exact order
             }
  
@@ -64,7 +64,7 @@ class OpenAiInterface:
             }
 
             Your job is to confirm that the "note_front" and "pos" fields are correct and provide 
-            an English translation. Analyze each token in the context of the full string and return 
+            an Target translation. Analyze each token in the context of the full string and return 
             an array of JSON objects formatted as follows for each "token":
 
             {
@@ -84,7 +84,7 @@ class OpenAiInterface:
                     capitalized. Otherwise, "note_front" should be lowercase.
 
             "note_back":
-                -   English verb translations should usually be preceded by "to" (e.g. "to be",
+                -   Target verb translations should usually be preceded by "to" (e.g. "to be",
                     "to have"). 
                 -   Case should match the case of "note_front".
 
