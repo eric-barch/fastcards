@@ -1,7 +1,6 @@
 class Note:
-    def __init__(self, session, source, token):
+    def __init__(self, session, token):
         self.session = session
-        self.source = source
         self.front = token["front"]
         self.back = token["back"]
         self.pos = token["pos"]
@@ -22,6 +21,7 @@ class Note:
         already_exists = f"already_exists: {self.already_exists}"
         spacer = f"\n{'':<5}"
 
+        # TODO: Hate this
         return f"{front}{spacer}{back}{spacer}{pos}{spacer}{gender}{spacer}{number}{spacer}{already_exists}"
 
     def check_if_already_exists(self):

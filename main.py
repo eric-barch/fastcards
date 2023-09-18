@@ -10,6 +10,7 @@ def main():
 
     while not exit:
         read_deck_name, write_deck_name = session.user.select_deck_names()
+
         session.anki.read_deck_name = read_deck_name
         session.anki.write_deck_name = write_deck_name
 

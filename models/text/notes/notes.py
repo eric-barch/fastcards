@@ -170,7 +170,6 @@ class Notes(list):
         for token in self.tokens:
             note = Note(
                 self.session,
-                self.source,
                 token,
             )
             self.append(note)
