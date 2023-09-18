@@ -1,9 +1,9 @@
 class Note:
-    def __init__(self, session, string, token):
+    def __init__(self, session, source, token):
         self.session = session
-        self.string = string
-        self.front = token["note_front"]
-        self.back = token["note_back"]
+        self.source = source
+        self.front = token["front"]
+        self.back = token["back"]
         self.representation = token["representation"]
         self.start = token["start"]
         self.end = token["end"]

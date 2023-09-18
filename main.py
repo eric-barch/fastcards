@@ -29,11 +29,8 @@ def main():
             session.text = Text(session, text)
             session.notes = Notes(session)
 
-            selected_note_indices = session.user_interface.select_new_notes()
-
-            print(f"\nAdding these notes:\n")
-            for selected_note_index in selected_note_indices:
-                print(session.notes[selected_note_index])
+            selected_note_indices = session.user_interface.select_notes()
+            session.anki_interface.add_notes(selected_note_indices)
 
 
 if __name__ == "__main__":
