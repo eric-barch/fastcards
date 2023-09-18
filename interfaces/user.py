@@ -1,20 +1,21 @@
-from models.source_string.source_string import SourceString
-
-
 class UserInterface:
     def __init__(self, session):
         self.session = session
 
-    def choose_decks(self):
-        read_deck_name = self.choose_deck("Choose a deck to check for existing notes: ")
+    def request_deck_names(self):
+        read_deck_name = self.request_deck_name(
+            "Choose a deck to read for existing notes: "
+        )
         print(f"\nRead deck selected: {read_deck_name}")
-        self.session.anki_interface.read_deck_name = read_deck_name
 
-        write_deck_name = self.choose_deck("Choose a deck to add new notes to: ")
+        write_deck_name = self.request_deck_name(
+            "Choose a deck to write new notes to: "
+        )
         print(f"\nWrite deck selected: {write_deck_name}")
-        self.session.anki_interface.write_deck_name = write_deck_name
 
-    def choose_deck(self, prompt):
+        return {"read_deck_name": read_deck_name, "write_deck_name": write_deck_name}
+
+    def request_deck_name(self, prompt):
         all_deck_names = self.session.anki_interface.get_all_deck_names()
 
         print("\nAll decks:\n")
@@ -38,44 +39,49 @@ class UserInterface:
                 print("\nInvalid choice. Please select a number from the list.")
                 continue
 
-    def process_french_string(self):
-        while True:
-            user_input = input(
-                "\nEnter a string in French (or type 'exit' to quit):\n\n"
-            )
+    def request_source_language_string(self):
+        user_input = input(
+            "\nEnter a string in French ('restart' to change decks, 'exit' to quit):\n\n"
+        )
+        return user_input
 
-            if user_input == "exit":
-                break
+    def request_new_notes(self):
+        potential_notes = self.session.source_string.potential_notes
 
-            self.session.source_string = SourceString(self.session, user_input)
+        print(f"\nPotential Notes: {potential_notes}")
 
-            notes_to_create = self.request_notes_to_create()
-
-            print(f"\n{notes_to_create}")
-
-    def request_notes_to_create(self):
         while True:
             user_input = input(
                 "\nEnter the number(s) of the note(s) you want to create, separated by commas "
-                + "(or type 'a' to create a note for all non-existent, non-proper nouns):\n\n"
+                "(or type 'a' to create a note for all non-existent, non-proper nouns):\n\n"
             )
 
-            potential_notes = self.session.source_string.potential_notes
-            notes_to_create_indices = []
+            result = self.validate_new_notes_input(user_input)
+            if result:
+                return result
 
-            if user_input.lower().strip() == "a":
-                for i, potential_note in enumerate(potential_notes):
-                    notes_to_create_indices.append(i)
-                return notes_to_create_indices
+    def validate_new_notes_input(self, user_input):
+        max_value = len(self.session.source_string.potential_notes)
 
-            try:
-                user_input_indices = [(int(i) - 1) for i in user_input.split(",")]
+        if user_input.lower().strip() == "a":
+            return "a"
 
-                for i in user_input_indices:
-                    if i < 0 or i >= len(potential_notes):
-                        raise Exception
+        try:
+            user_input_indices = [int(i) for i in user_input.split(",")]
 
-                return user_input_indices
-            except:
-                print("\nInvalid input.")
-                continue
+            # Check if the indices are within the valid range
+            if any(i < 1 or i > max_value for i in user_input_indices):
+                print(
+                    f"\nInvalid. One or more of your choices falls outside the range of "
+                    f"Potential New Notes (1-{max_value})."
+                )
+                return None
+
+            return user_input_indices
+
+        except ValueError:
+            print(
+                "\nPlease enter either 'a' or a comma-separated list of integers specifying "
+                "the new notes you want to create."
+            )
+            return None

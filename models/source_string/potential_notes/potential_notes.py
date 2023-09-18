@@ -29,8 +29,6 @@ class PotentialNotes(list):
         self.tokens = self.set_tokens(parsed_tokens, confirmed_tokens)
         self.create_potential_notes()
 
-        print(self)
-
     def __repr__(self):
         repr = "\n"
 
