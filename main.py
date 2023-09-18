@@ -5,7 +5,7 @@ def main():
     session = Session()
 
     session.user_interface.choose_decks()
-    session.user_interface.request_string()
+    session.user_interface.process_french_string()
 
 
 if __name__ == "__main__":
