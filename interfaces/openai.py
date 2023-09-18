@@ -25,7 +25,7 @@ class OpenAiInterface:
         )
         return response.choices[0].message.content
 
-    def get_source_and_target_strings_system_prompt(self):
+    def get_source_and_target_system_prompt(self):
         return """
             You will receive a string in Source. Return a JSON object with a "source" field, 
             containing a cleaned up version of the input string (correct misspellings, accents, 
@@ -40,8 +40,8 @@ class OpenAiInterface:
             }
         """
 
-    def get_source_and_target_strings(self, input):
-        system_prompt = self.get_source_and_target_strings_system_prompt()
+    def get_source_and_target(self, input):
+        system_prompt = self.get_source_and_target_system_prompt()
         response_str = self.call_api(system_prompt, input)
         response_obj = json.loads(response_str)
         return response_obj
