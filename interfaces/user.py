@@ -38,7 +38,7 @@ class UserInterface:
                 print("\nInvalid choice. Please select a number from the list.")
                 continue
 
-    def request_string(self):
+    def process_french_string(self):
         while True:
             user_input = input(
                 "\nEnter a string in French (or type 'exit' to quit):\n\n"
@@ -47,4 +47,35 @@ class UserInterface:
             if user_input == "exit":
                 break
 
-            SourceString(self.session, user_input)
+            self.session.source_string = SourceString(self.session, user_input)
+
+            notes_to_create = self.request_notes_to_create()
+
+            print(f"\n{notes_to_create}")
+
+    def request_notes_to_create(self):
+        while True:
+            user_input = input(
+                "\nEnter the number(s) of the note(s) you want to create, separated by commas "
+                + "(or type 'a' to create a note for all non-existent, non-proper nouns):\n\n"
+            )
+
+            potential_notes = self.session.source_string.potential_notes
+            notes_to_create_indices = []
+
+            if user_input.lower().strip() == "a":
+                for i, potential_note in enumerate(potential_notes):
+                    notes_to_create_indices.append(i)
+                return notes_to_create_indices
+
+            try:
+                user_input_indices = [(int(i) - 1) for i in user_input.split(",")]
+
+                for i in user_input_indices:
+                    if i < 0 or i >= len(potential_notes):
+                        raise Exception
+
+                return user_input_indices
+            except:
+                print("\nInvalid input.")
+                continue

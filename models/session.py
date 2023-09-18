@@ -8,3 +8,4 @@ class Session:
         self.user_interface = UserInterface(self)
         self.anki_interface = AnkiInterface(self)
         self.openai_interface = OpenAiInterface(self)
+        self.source_string = None

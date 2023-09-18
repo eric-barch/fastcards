@@ -7,7 +7,7 @@ from .potential_note import PotentialNote
 nlp = spacy.load("fr_core_news_sm")
 
 
-class PotentialNotes:
+class PotentialNotes(list):
     def __init__(self, session, string):
         super().__init__()
         self.session = session
@@ -27,18 +27,18 @@ class PotentialNotes:
         confirmed_tokens = self.session.openai_interface.confirm_tokens(request)
 
         self.tokens = self.set_tokens(parsed_tokens, confirmed_tokens)
-        self.potential_notes = self.create_potential_notes()
+        self.create_potential_notes()
 
         print(self)
 
     def __repr__(self):
         repr = "\n"
 
-        for i, potential_note in enumerate(self.potential_notes):
+        for i, potential_note in enumerate(self):
             number = f"{i + 1}."
             repr += f"{number:<5}{potential_note}"
 
-            if i != len(self.potential_notes) - 1:
+            if i != len(self) - 1:
                 repr += "\n"
 
         return repr
@@ -167,14 +167,12 @@ class PotentialNotes:
         return self.tokens
 
     def create_potential_notes(self):
-        self.potential_notes = []
-
         for token in self.tokens:
             potential_note = PotentialNote(
                 self.session,
                 self.string,
                 token,
             )
-            self.potential_notes.append(potential_note)
+            self.append(potential_note)
 
-        return self.potential_notes
+        return self
