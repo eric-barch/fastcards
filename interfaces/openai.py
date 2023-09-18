@@ -5,12 +5,12 @@ import openai
 from dotenv import load_dotenv
 
 
-class OpenAiInterface:
+class OpenAi:
     def __init__(self, session):
         load_dotenv()
         openai.api_key = os.getenv("OPENAI_API_KEY")
         self.session = session
-        session.openai_interface = self
+        session.openai = self
 
     def call_api(self, systemPrompt: str, string: str):
         response = openai.ChatCompletion.create(

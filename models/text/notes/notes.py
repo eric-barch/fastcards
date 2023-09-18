@@ -26,7 +26,7 @@ class Notes(list):
             indent=4,
         )
 
-        confirmed_tokens = self.session.openai_interface.confirm_tokens(request)
+        confirmed_tokens = self.session.openai.confirm_tokens(request)
 
         self.tokens = self.set_tokens(parsed_tokens, confirmed_tokens)
         self.create_notes()

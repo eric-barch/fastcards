@@ -21,7 +21,7 @@ class Note:
         return f"{front:<30}{back:<30}{already_exists}"
 
     def check_if_already_exists(self):
-        existing_notes = self.session.anki_interface.find_notes_by_front(
+        existing_notes = self.session.anki.find_notes_by_front(
             self.front,
         )
 

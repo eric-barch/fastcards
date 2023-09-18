@@ -1,4 +1,4 @@
-class UserInterface:
+class User:
     def __init__(self, session):
         self.session = session
 
@@ -16,7 +16,7 @@ class UserInterface:
         return {"read_deck_name": read_deck_name, "write_deck_name": write_deck_name}
 
     def request_deck_name(self, prompt):
-        all_deck_names = self.session.anki_interface.get_all_deck_names()
+        all_deck_names = self.session.anki.get_all_deck_names()
 
         print("\nAll decks:\n")
 
