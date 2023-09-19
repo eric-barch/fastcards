@@ -159,8 +159,8 @@ class Notes(list):
         for i, token in enumerate(tokens):
             confirmed_token = confirmed_tokens[i]
 
-            token["front"] = confirmed_token["front"]
-            token["back"] = confirmed_token["back"]
+            token["source"] = confirmed_token["source"]
+            token["target"] = confirmed_token["target"]
             token["pos"] = confirmed_token["pos"]
 
         self.tokens = tokens
