@@ -53,7 +53,7 @@ class User:
     def select_notes(self):
         notes = self.session.text.notes
 
-        print(f"\nExtracted notes: {notes}")
+        print(f"\nExtracted notes:\n\n{notes}")
 
         while True:
             user_input = input(
