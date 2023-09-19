@@ -50,7 +50,7 @@ class Notes(list):
 
         for token in parsed_string:
             if token.pos_ != "PUNCT":
-                front = self.get_front(token)
+                source = self.get_source(token)
 
                 morph = token.morph.to_dict()
 
@@ -61,7 +61,7 @@ class Notes(list):
                 number = self.get_number_string(number_abbr) if number_abbr else None
 
                 parsed_token = {
-                    "front": front,
+                    "source": source,
                     "representation": token.text,
                     "start": token.idx,
                     "end": token.idx + len(token.text),
@@ -75,7 +75,7 @@ class Notes(list):
 
         return parsed_tokens
 
-    def get_front(self, token):
+    def get_source(self, token):
         is_contraction_part = token.text.endswith("'")
         is_inverted_subject_pron = token.text.startswith("-")
         is_verb = self.get_pos_string(token.pos_) == "verb"
@@ -141,8 +141,10 @@ class Notes(list):
         for token in parsed_tokens:
             request_token = {
                 "representation": token["representation"],
-                "front": token["front"],
+                "source": token["source"],
                 "pos": token["pos"],
+                "gender": token["gender"],
+                "number": token["number"],
             }
             request_tokens.append(request_token)
 
@@ -162,6 +164,8 @@ class Notes(list):
             token["source"] = confirmed_token["source"]
             token["target"] = confirmed_token["target"]
             token["pos"] = confirmed_token["pos"]
+            token["gender"] = confirmed_token["gender"]
+            token["number"] = confirmed_token["number"]
 
         self.tokens = tokens
         return self.tokens
