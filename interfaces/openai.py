@@ -59,34 +59,34 @@ class OpenAi:
 
             {
                 "representation": the exact way the token appears in "string",
-                "front": a "generalized" form of "representation" (may be the original "representation" or its lemma),
+                "source": a "generalized" form of "representation" (may be the original "representation" or its lemma),
                 "pos": the part of speech "token" is functioning as in the string
             }
 
-            Your job is to confirm that the "front" and "pos" fields are correct and provide 
+            Your job is to confirm that the "source" and "pos" fields are correct and provide 
             an Target translation. Analyze each token in the context of the full string and return 
             an array of JSON objects formatted as follows for each "token":
 
             {
-                "front": string,
-                "back": string,
+                "source": string,
+                "target": string,
                 "pos": string,
             }
 
-            "front":
+            "source":
                 -   Should usually be the same as "token"'s "representation" unless:
                     -   "token" is part of a contraction (usually ending in "'"), or is an inverted 
-                        subject pronoun (usually starting with "-"). In this case, "front" 
+                        subject pronoun (usually starting with "-"). In this case, "source" 
                         should be "token"'s lemma.
                     -   "token" is functioning as a verb in the original string. In this case, 
-                        "front" should be the infinitive form of "token".
-                -   If "token" is a proper noun in the original string, "front" should be
-                    capitalized. Otherwise, "front" should be lowercase.
+                        "source" should be the infinitive form of "token".
+                -   If "token" is a proper noun in the original string, "source" should be
+                    capitalized. Otherwise, "source" should be lowercase.
 
-            "back":
+            "target":
                 -   Target verb translations should usually be preceded by "to" (e.g. "to be",
                     "to have"). 
-                -   Case should match the case of "front".
+                -   Case should match the case of "source".
 
             "pos":
                 -   Make sure the token is actually functioning as the "pos" in the request object.
@@ -121,12 +121,12 @@ class OpenAi:
                     ..., // other "token"s
                     {
                         "representation": "d'".
-                        "front": "de",
+                        "source": "de",
                         "pos": "preposition"
                     },
                     {
                         "representation": "avaler",
-                        "front": "avaler",
+                        "source": "avaler",
                         "pos": "verb"
                     }
                     ... // other "token"s
@@ -135,13 +135,13 @@ class OpenAi:
             Correct output: [
                 ..., // other "token"s
                 {
-                    "front": "de", // from "d'" in "d'avaler"
-                    "back": "of",
+                    "source": "de", // from "d'" in "d'avaler"
+                    "target": "of",
                     "pos": "preposition"
                 },
                 {
-                    "front": "avaler", // from "avaler" in "d'avaler"
-                    "back": "to swallow",
+                    "source": "avaler", // from "avaler" in "d'avaler"
+                    "target": "to swallow",
                     "pos": "verb"
                 }
                 ... // other "token"s
@@ -149,13 +149,13 @@ class OpenAi:
             Incorrect output: [
                 ..., // other "token"s
                 {
-                    "front": "avaler", // from "avaler" in "d'avaler" - should be "de"
-                    "back": "to swallow",
+                    "source": "avaler", // from "avaler" in "d'avaler" - should be "de"
+                    "target": "to swallow",
                     "pos": "verb"
                 },
                 {
-                    "front": "avaler", // from "avaler" in "d'avaler" again - technically correct in this position, but redundant because of mistake above
-                    "back": "to swallow",
+                    "source": "avaler", // from "avaler" in "d'avaler" again - technically correct in this position, but redundant because of mistake above
+                    "target": "to swallow",
                     "pos": "verb"
                 }
                 ... // other "token"s
