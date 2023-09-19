@@ -35,8 +35,8 @@ class Notes(list):
         repr = "\n"
 
         for i, note in enumerate(self):
-            number = f"{i + 1}."
-            repr += f"{number:<5}{note}"
+            number = f"\n{i + 1}."
+            repr += f"{number:<6}{note}"
 
             if i != len(self) - 1:
                 repr += "\n"
