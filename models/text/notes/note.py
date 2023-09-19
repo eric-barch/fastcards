@@ -4,31 +4,32 @@ class Note:
         self.token = token
         self.source = self.token["source"]
         self.target = self.token["target"]
-
-        self.pos_source, self.pos_target = self.get_pos()
-        self.gender_source, self.gender_target = self.get_gender()
-        self.number_source, self.number_target = self.get_number()
-
         self.representation = token["representation"]
         self.start = token["start"]
         self.end = token["end"]
         self.lemma = token["lemma"]
-        self.already_exists = self.check_if_already_exists()
+        self.already_exists = self.check_for_existing()
+
+        self.pos_source, self.pos_target = self.get_pos_source_and_target()
+        self.gender_source, self.gender_target = self.get_gender_source_and_target()
+        self.number_source, self.number_target = self.get_number_source_and_target()
 
     def __repr__(self):
-        front = f"front: {self.source}"
-        back = f"back: {self.target}"
-        pos = f"pos: {self.pos_source}"
-        gender = f"gender: {self.gender_target}"
-        number = f"number: {self.number_target}"
-        already_exists = f"already_exists: {self.already_exists}"
-        spacer = f"\n{'':<5}"
+        indent = 5
+        column_width = 30
 
-        # TODO: Hate this
-        return f"{front}{spacer}{back}{spacer}{pos}{spacer}{gender}{spacer}{number}{spacer}{already_exists}"
+        parts = [
+            f"source: {self.source:<{22}}target: {self.target}",
+            f"{'':<{indent}}{'pos_source: ' + self.pos_source:<{column_width}}pos_target: {self.pos_target}",
+            f"{'':<{indent}}{'gender_source: ' + self.gender_source:<{column_width}}gender_target: {self.gender_target}",
+            f"{'':<{indent}}{'number_source: ' + self.number_source:<{column_width}}number_target: {self.number_target}",
+            f"{'':<{indent}}{'already_exists: ' + str(self.already_exists)}",
+        ]
 
-    def get_pos(self):
-        pos_sources = {
+        return "\n".join(parts)
+
+    def get_pos_source_and_target(self):
+        pos_target_to_source = {
             "adjective": "adjectif",
             "adposition": "adposition",
             "adverb": "adverbe",
@@ -51,43 +52,43 @@ class Note:
         }
 
         pos_target = self.token["pos"]
-        if pos_target:
-            pos_source = pos_sources[pos_target]
-        else:
-            pos_source = None
 
+        if not pos_target:
+            return "none", "none"
+
+        pos_source = pos_target_to_source[pos_target]
         return pos_source, pos_target
 
-    def get_gender(self):
-        gender_sources = {
+    def get_gender_source_and_target(self):
+        gender_target_to_source = {
             "masculine": "masculin",
             "feminine": "féminin",
             "neuter": "neutre",
         }
 
         gender_target = self.token["gender"]
-        if gender_target:
-            gender_source = gender_sources[gender_target]
-        else:
-            gender_source = None
 
+        if not gender_target:
+            return "none", "none"
+
+        gender_source = gender_target_to_source[gender_target]
         return gender_source, gender_target
 
-    def get_number(self):
-        number_sources = {
+    def get_number_source_and_target(self):
+        number_target_to_source = {
             "singular": "singulier",
             "plural": "pluriel",
         }
 
         number_target = self.token["number"]
-        if number_target:
-            number_source = number_sources[number_target]
-        else:
-            number_source = None
 
+        if not number_target:
+            return "none", "none"
+
+        number_source = number_target_to_source[number_target]
         return number_source, number_target
 
-    def check_if_already_exists(self):
+    def check_for_existing(self):
         existing_notes = self.session.anki.find_notes_by_front(
             self.source,
         )
