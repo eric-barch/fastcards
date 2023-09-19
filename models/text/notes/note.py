@@ -8,7 +8,7 @@ class Note:
         self.start = token["start"]
         self.end = token["end"]
         self.lemma = token["lemma"]
-        self.already_exists = self.check_for_existing()
+        self.exists = self.check_if_exists()
 
         self.pos_source, self.pos_target = self.get_pos_source_and_target()
         self.gender_source, self.gender_target = self.get_gender_source_and_target()
@@ -23,7 +23,7 @@ class Note:
             f"{'':<{indent}}{'pos_source: ' + self.pos_source:<{column_width}}pos_target: {self.pos_target}",
             f"{'':<{indent}}{'gender_source: ' + self.gender_source:<{column_width}}gender_target: {self.gender_target}",
             f"{'':<{indent}}{'number_source: ' + self.number_source:<{column_width}}number_target: {self.number_target}",
-            f"{'':<{indent}}{'already_exists: ' + str(self.already_exists)}",
+            f"{'':<{indent}}{'already_exists: ' + str(self.exists)}",
         ]
 
         return "\n".join(parts)
@@ -88,14 +88,14 @@ class Note:
         number_source = number_target_to_source[number_target]
         return number_source, number_target
 
-    def check_for_existing(self):
-        existing_notes = self.session.anki.find_notes_by_front(
+    def check_if_exists(self):
+        matching_notes = self.session.anki.find_notes(
             self.source,
         )
 
-        if existing_notes:
-            self.already_exists = True
+        if matching_notes:
+            self.exists = True
         else:
-            self.already_exists = False
+            self.exists = False
 
-        return self.already_exists
+        return self.exists

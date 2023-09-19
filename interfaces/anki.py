@@ -30,13 +30,14 @@ class Anki:
     def get_all_deck_names(self):
         return self.call_api("deckNames")
 
-    def find_notes_by_front(self, front):
-        query = f'deck:"{self.read_deck_name}" "front:{front}"'
+    def find_notes(self, source):
+        query = f'deck:"{self.read_deck_name}" source:"{source}"'
 
-        return self.call_api(
-            "findNotes",
-            query=query,
-        )
+        response = self.call_api("findNotes", query=query)
+
+        print(f"response: {response}")
+
+        return response
 
     def add_note(self, note):
         if note.gender == None:
