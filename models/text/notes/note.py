@@ -89,7 +89,7 @@ class Note:
         return number_source, number_target
 
     def check_for_existing(self):
-        existing_notes = self.session.anki.find_notes_by_front(
+        existing_notes = self.session.anki.find_notes(
             self.source,
         )
 
