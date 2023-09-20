@@ -52,7 +52,7 @@ class OpenAi:
             You will receive a JSON object formatted as follows:
 
             {
-                "string": a string in French (the source language),
+                "string": a string in French,
                 "tokens": a JSON array of the tokens in "string" in exact order
             }
  
@@ -60,127 +60,89 @@ class OpenAi:
 
             {
                 "representation": the exact way the token appears in "string",
-                "source": a "generalized" form of "representation" (may be the original "representation" or its lemma),
-                "pos": the part of speech "token" is functioning as in the string,
-                "gender": the token's gender, if any,
-                "number": the token's number, if any,
+                "source": the original "representation" or its lemma,
+                "pos": "token"'s part of speech,
+                "gender": "token"'s gender, if any,
+                "number": "token"'s number, if any,
             }
 
-            Your job is to analyze each token in the context of the string and confirm that the 
-            information in the object you receive is correct. You should also provide a translation 
-            of "source" in English (the target language). Return an array of JSON objects in the
-            following format for each object in the request array:
+            Use this as a (possibly inaccurate) starting point to analyze each token in the context 
+            of the string. Return an array of corrected JSON objects with an English translation as 
+            below. There should always be exactly as many objects in your response array as there 
+            were in the input "tokens" array.
 
             {
                 "source": corrected "source",
-                "target": translation of corrected "source",
-                "pos": corrected "pos",
-                "gender": corrected "gender", if any,
-                "number": corrected "number", if any,
+                "target": English translation of crrected "source" (NOT "representation"),
+                "pos": part of speech of corrected "source" (choose from options below),
+                "gender": gender of corrected "source", if any,
+                "number": number of corrected "source", if any
             }
 
-            Please note the following in your response:
+            "pos" options:
+                "adjective",
+                "adposition",
+                "adverb",
+                "auxiliary",
+                "conjunction",
+                "coord conj",
+                "determiner",
+                "interjection",
+                "noun",
+                "numeral",
+                "particle",
+                "pronoun",
+                "proper noun",
+                "punctuation",
+                "subord conj",
+                "symbol",
+                "verb",
+                "other",
+                "space"
             
-            "source":
-                -   Should usually be the same as "token"'s "representation" unless:
-                    -   "token" is part of a contraction (usually ending in "'"), or is an inverted 
-                        subject pronoun (usually starting with "-"). In this case, "source" 
-                        should be "token"'s lemma.
-                    -   "token" is functioning as a verb in the original string. In this case, 
-                        "source" should be the infinitive form of "token".
-                -   If the CORRECTED pos is not a proper noun, this field should be lowercase.
+            Below are some examples of an input string with the relevant token bracketed, and the 
+            correct output object for that token.
 
-            "target":
-                -   English verb translations should usually be preceded by "to" (e.g. "to be",
-                    "to have").
-                -   If the CORRECTED pos is not a proper noun, this field should be lowercase.
-
-            "pos":
-                -   Choose from the following options:
-                        "adjective",
-                        "adposition",
-                        "adverb",
-                        "auxiliary",
-                        "conjunction",
-                        "coord conj",
-                        "determiner",
-                        "interjection",
-                        "noun",
-                        "numeral",
-                        "particle",
-                        "pronoun",
-                        "proper noun",
-                        "punctuation",
-                        "subord conj",
-                        "symbol",
-                        "verb",
-                        "other",
-                        "space"
-                
-            "gender" and "number":
-                -   Be sure to correct these fields to null if the concepts of gender and/or number
-                    do not apply to "token".
-                
-            With contractions, pay careful attention to which token within the contraction is
-            referenced. For example:
-
-            Input: {
-                "string": "On a le temps d'avaler quelque chose avant le départ du train.",
-                "token_data": [
-                    ..., // other "token"s
-                    {
-                        "representation": "d'".
-                        "source": "de",
-                        "pos": "preposition"
-                        "gender": null,
-                        "number": null,
-                    },
-                    {
-                        "representation": "avaler",
-                        "source": "avaler",
-                        "pos": "verb",
-                        "gender": null,
-                        "number": null
-                    }
-                    ... // other "token"s
-                ]
+            Input: Je [suis] un homme.
+            Output: {
+                "source": "être", // verb "source"s are always lemmas
+                "target": "to be", // verb "target"s are always infinitives
+                "pos": "verb",
+                "gender": null,
+                "number": null
             }
-            Correct output: [
-                ..., // other "token"s
-                {
-                    "source": "de", // from "d'" in "d'avaler"
-                    "target": "of",
-                    "pos": "preposition",
-                    "gender": null,
-                    "number": null
-                },
-                {
-                    "source": "avaler", // from "avaler" in "d'avaler"
-                    "target": "to swallow",
-                    "pos": "verb",
-                    "gender": null,
-                    "number": null
-                }
-                ... // other "token"s
-            ]
-            Incorrect output: [
-                ..., // other "token"s
-                {
-                    "source": "avaler", // from "avaler" in "d'avaler" - should be "de"
-                    "target": "to swallow",
-                    "pos": "verb"
-                    "gender": null,
-                    "number": null
-                },
-                {
-                    "source": "avaler", // from "avaler" in "d'avaler" again - technically correct in this position, but redundant because of mistake above
-                    "target": "to swallow",
-                    "pos": "verb",
-                    "gender": null,
-                    "number": null
-                }
-                ... // other "token"s
-            ]
+
+            Input: Je [m'][appelle] [Jean].
+            Output 1: {
+                "source": "me", // lemma of "m'" from "m'appelle"
+                "target": "myself",
+                "pos": "pronoun",
+                "gender": null,
+                "number": null
+            }
+            Output 2: {
+                "source": "appeler", // lemma of "appelle" from "m'appelle"
+                "target": "to call",
+                "pos": "verb",
+                "gender": null,
+                "number": null
+            }
+            Output 3: {
+                "source": "Jean", // proper nouns remain capitalized
+                "target": "Jean",
+                "pos": "proper noun",
+                "gender": masculine,
+                "number": singular
+            }
+
+            Input: [Bonjour], mon ami. Comment ça va?
+            Output: {
+                "source": "bonjour", // lowercase because not proper noun
+                "target": "hello",
+                "pos": "interjection",
+                "gender": null,
+                "number": null
+            }
         """
 
     def get_tokens(self, request):
