@@ -32,13 +32,7 @@ class Anki:
 
     def find_notes(self, source):
         query = f'deck:"{self.read_deck_name}" source:"{source}"'
-
-        print(f"query: {query}")
-
         response = self.call_api("findNotes", query=query)
-
-        print(f"response: {response}")
-
         return response
 
     def add_note(self, note):
@@ -63,8 +57,18 @@ class Anki:
         )
 
     def add_notes(self, selected_note_indices):
+        print()
+
         for selected_note_index in selected_note_indices:
             note = self.session.notes[selected_note_index]
-            self.add_note(
-                note,
-            )
+
+            if note.pos_target == "proper noun":
+                print(f"Skipped {note.source} (proper noun)")
+                continue
+
+            try:
+                self.add_note(
+                    note,
+                )
+            except:
+                print(f"Skipped {note.source} (already exists)")

@@ -41,6 +41,7 @@ class Note:
             "noun": "nom",
             "numeral": "numéral",
             "particle": "particule",
+            "preposition": "préposition",
             "pronoun": "pronom",
             "proper noun": "nom propre",
             "punctuation": "ponctuation",
@@ -92,8 +93,6 @@ class Note:
         matching_notes = self.session.anki.find_notes(
             self.source,
         )
-
-        print(matching_notes)
 
         if matching_notes:
             self.exists = True
