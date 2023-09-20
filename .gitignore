@@ -2,3 +2,4 @@ venv/
 .env
 .vscode
 **/.DS_Store
+.VSCodeCounter
