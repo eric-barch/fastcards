@@ -50,7 +50,7 @@ class User:
         )
         return user_input
 
-    def select_notes(self):
+    def select_tokens(self):
         notes = self.session.text.notes
 
         print(f"\nExtracted notes:{notes}")
