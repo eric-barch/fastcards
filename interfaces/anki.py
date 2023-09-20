@@ -33,6 +33,8 @@ class Anki:
     def find_notes(self, source):
         query = f'deck:"{self.read_deck_name}" source:"{source}"'
 
+        print(f"query: {query}")
+
         response = self.call_api("findNotes", query=query)
 
         print(f"response: {response}")
@@ -40,16 +42,6 @@ class Anki:
         return response
 
     def add_note(self, note):
-        if note.gender == None:
-            gender = "none"
-        else:
-            gender = note.gender
-
-        if note.number == None:
-            number = "none"
-        else:
-            number = note.number
-
         return self.call_api(
             "addNote",
             note={
