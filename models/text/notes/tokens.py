@@ -2,7 +2,8 @@ import json
 
 import spacy
 
-from .note import Note
+from .note.spacy_token.spacy_token import SpacyToken
+from .note.note import Note
 
 nlp = spacy.load("fr_core_news_sm")
 
@@ -11,24 +12,10 @@ class Notes(list):
     def __init__(self, session):
         super().__init__()
         self.session = session
-
-        self.source = session.text.source
-        session.text.notes = self
-
-        parsed_tokens = self.parse_tokens()
-
-        request_tokens = self.get_request_tokens(parsed_tokens)
-        request = json.dumps(
-            {
-                "string": self.source,
-                "tokens": request_tokens,
-            },
-            indent=4,
-        )
-
-        confirmed_tokens = self.session.openai.confirm_tokens(request)
-
-        self.tokens = self.set_tokens(parsed_tokens, confirmed_tokens)
+        self.text = session.text
+        self.text.notes = self
+        self.spacy_tokens = self.get_spacy_tokens()
+        self.openai_tokens = self.get_openai_tokens()
         self.create_notes()
 
     def __repr__(self):
@@ -43,15 +30,13 @@ class Notes(list):
 
         return repr
 
-    def parse_tokens(self):
+    def get_spacy_tokens(self):
         parsed_string = nlp(self.source)
 
-        parsed_tokens = []
+        spacy_tokens = []
 
         for token in parsed_string:
             if token.pos_ != "PUNCT":
-                source = self.get_source(token)
-
                 morph = token.morph.to_dict()
 
                 gender_abbr = morph.get("Gender")
@@ -60,20 +45,19 @@ class Notes(list):
                 number_abbr = morph.get("Number")
                 number = self.get_number_string(number_abbr) if number_abbr else None
 
-                parsed_token = {
-                    "source": source,
-                    "representation": token.text,
-                    "start": token.idx,
-                    "end": token.idx + len(token.text),
-                    "lemma": token.lemma_,
-                    "pos": self.get_pos_string(token.pos_),
-                    "gender": gender,
-                    "number": number,
-                }
+                spacy_token = SpacyToken(
+                    token.text,
+                    token.idx,
+                    token.idx + len(token.text),
+                    token.lemma,
+                    token.pos,
+                    gender,
+                    number,
+                )
 
-                parsed_tokens.append(parsed_token)
+                spacy_tokens.append(spacy_token)
 
-        return parsed_tokens
+        return spacy_tokens
 
     def get_source(self, token):
         is_contraction_part = token.text.endswith("'")
