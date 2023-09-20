@@ -53,12 +53,12 @@ class User:
     def select_notes(self):
         notes = self.session.text.notes
 
-        print(f"\nExtracted notes:\n\n{notes}")
+        print(f"\nExtracted notes:{notes}")
 
         while True:
             user_input = input(
-                "\nEnter the number(s) of the note(s) you want to create, separated by commas "
-                "(or type 'a' to create a note for all non-existent, non-proper nouns):\n\n"
+                "\nEnter the number(s) of the note(s) you want to create, separated by commas, "
+                "or type 'a' for all (will skip duplicates and proper nouns):\n\n"
             )
 
             result = self.validate_new_notes_input(user_input, len(notes))
