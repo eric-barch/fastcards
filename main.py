@@ -30,6 +30,8 @@ def main():
             session.text = Text(session, text)
             session.tokens = Tokens(session)
 
+            selected_token_indices = session.user.select_tokens()
+
 
 if __name__ == "__main__":
     main()

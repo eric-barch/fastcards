@@ -8,12 +8,27 @@ class Token:
         indent = 5
         column_width = 30
 
+        representation = self.spacy_token.representation
+        target = self.openai_token.target
+
+        spacy_source = str(self.spacy_token.source)
+        openai_source = str(self.openai_token.source)
+
+        spacy_pos = str(self.spacy_token.pos)
+        openai_pos = str(self.openai_token.pos)
+
+        spacy_gender = str(self.spacy_token.gender)
+        openai_gender = str(self.openai_token.gender)
+
+        spacy_number = str(self.spacy_token.number)
+        openai_number = str(self.openai_token.number)
+
         parts = [
-            f"source: {self.source:<{22}}target: {self.target}",
-            f"{'':<{indent}}{'pos_source: ' + self.pos_source:<{column_width}}pos_target: {self.pos_target}",
-            f"{'':<{indent}}{'gender_source: ' + self.gender_source:<{column_width}}gender_target: {self.gender_target}",
-            f"{'':<{indent}}{'number_source: ' + self.number_source:<{column_width}}number_target: {self.number_target}",
-            f"{'':<{indent}}{'already_exists: ' + str(self.exists)}",
+            f"representation: {representation:<{14}}target: {target}",
+            f"{'':<{indent}}{'spacy_source: ' + spacy_source:<{column_width}}{'openai_source: ' + openai_source}",
+            f"{'':<{indent}}{'spacy_pos: ' + spacy_pos:<{column_width}}{'openai_pos: ' + openai_pos}",
+            f"{'':<{indent}}{'spacy_gender: ' + spacy_gender:<{column_width}}{'openai_gender: ' + openai_gender}",
+            f"{'':<{indent}}{'spacy_number: ' + spacy_number:<{column_width}}{'openai_number: ' + openai_number}",
         ]
 
         return "\n".join(parts)
