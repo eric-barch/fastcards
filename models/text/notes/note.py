@@ -93,6 +93,8 @@ class Note:
             self.source,
         )
 
+        print(matching_notes)
+
         if matching_notes:
             self.exists = True
         else:

@@ -56,7 +56,7 @@ class OpenAi:
                 "tokens": a JSON array of the tokens in "string" in exact order
             }
  
-            Each "token" within "tokens" will be formatted as follows:
+            Each "token" object within "tokens" will be formatted as follows:
 
             {
                 "representation": the exact way the token appears in "string",
@@ -66,21 +66,20 @@ class OpenAi:
                 "number": the token's number, if any,
             }
 
-            Your job is to analyze each token in the context of the string, and confirm that the 
+            Your job is to analyze each token in the context of the string and confirm that the 
             information in the object you receive is correct. You should also provide a translation 
-            of "source" (if applicable, the post-correction "source") in English (the target 
-            language). Return a JSON array with an object in the following format for each object
-            in the request array:
+            of "source" in English (the target language). Return an array of JSON objects in the
+            following format for each object in the request array:
 
             {
-                "source": corrected request "source",
-                "target": target language translation of corrected "source",
-                "pos": corrected request "source",
-                "gender": corrected request "gender",
-                "number": corrected request "number",
+                "source": corrected "source",
+                "target": translation of corrected "source",
+                "pos": corrected "pos",
+                "gender": corrected "gender", if any,
+                "number": corrected "number", if any,
             }
 
-            Please note the following:
+            Please note the following in your response:
             
             "source":
                 -   Should usually be the same as "token"'s "representation" unless:
@@ -89,12 +88,12 @@ class OpenAi:
                         should be "token"'s lemma.
                     -   "token" is functioning as a verb in the original string. In this case, 
                         "source" should be the infinitive form of "token".
-                -   If a proper noun, MAKE SURE it is uppercase. Otherwise, should be lowercase.
+                -   If the CORRECTED pos is not a proper noun, this field should be lowercase.
 
             "target":
                 -   English verb translations should usually be preceded by "to" (e.g. "to be",
                     "to have").
-                -   If a proper noun, MAKE SURE it is uppercase. Otherwise, should be lowercase.
+                -   If the CORRECTED pos is not a proper noun, this field should be lowercase.
 
             "pos":
                 -   Choose from the following options:
