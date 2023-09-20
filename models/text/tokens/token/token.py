@@ -1,18 +1,8 @@
-class Note:
-    def __init__(self, session, token):
+class Token:
+    def __init__(self, session, spacy_token, openai_token):
         self.session = session
-        self.token = token
-        self.source = self.token["source"]
-        self.target = self.token["target"]
-        self.representation = token["representation"]
-        self.start = token["start"]
-        self.end = token["end"]
-        self.lemma = token["lemma"]
-        self.exists = self.check_if_exists()
-
-        self.pos_source, self.pos_target = self.get_pos_source_and_target()
-        self.gender_source, self.gender_target = self.get_gender_source_and_target()
-        self.number_source, self.number_target = self.get_number_source_and_target()
+        self.spacy_token = spacy_token
+        self.openai_token = openai_token
 
     def __repr__(self):
         indent = 5
