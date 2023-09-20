@@ -50,33 +50,33 @@ class User:
         )
         return user_input
 
-    def select_notes(self):
-        notes = self.session.text.notes
+    def select_tokens(self):
+        tokens = self.session.tokens
 
-        print(f"\nExtracted notes:{notes}")
+        print(f"\nExtracted tokens:\n{tokens}")
 
         while True:
             user_input = input(
-                "\nEnter the number(s) of the note(s) you want to create, separated by commas, "
-                "or type 'a' for all (will skip duplicates and proper nouns):\n\n"
+                "\nEnter the number(s) of the token(s) you want to create notes for, separated by "
+                "commas or type 'a' for all (will skip duplicates and proper nouns):\n\n"
             )
 
-            result = self.validate_new_notes_input(user_input, len(notes))
+            result = self.validate_new_tokens_input(user_input, len(tokens))
 
             if result:
-                note_indices = []
+                token_indices = []
 
                 if result == "a":
-                    for i, note in enumerate(notes):
-                        note_indices.append(i)
+                    for i, token in enumerate(tokens):
+                        token_indices.append(i)
                 else:
-                    for note_number in result:
-                        note_index = note_number - 1
-                        note_indices.append(note_index)
+                    for token_number in result:
+                        token_index = token_number - 1
+                        token_indices.append(token_index)
 
-                return note_indices
+                return token_indices
 
-    def validate_new_notes_input(self, user_input, max_value):
+    def validate_new_tokens_input(self, user_input, max_value):
         if user_input.lower().strip() == "a":
             return "a"
 
@@ -87,7 +87,7 @@ class User:
             if any(i < 1 or i > max_value for i in user_input_indices):
                 print(
                     f"\nInvalid. One or more of your choices falls outside the range of "
-                    f"Notes (1-{max_value})."
+                    f"Tokens (1-{max_value})."
                 )
                 return None
 
@@ -95,7 +95,7 @@ class User:
 
         except ValueError:
             print(
-                "\nPlease enter 'a' or a comma-separated list of integers specifying the new notes "
+                "\nPlease enter 'a' or a comma-separated list of integers specifying the new tokens "
                 "you want to create."
             )
             return None

@@ -1,6 +1,6 @@
 from models.session import Session
 from models.text.text import Text
-from models.text.notes.notes import Notes
+from models.text.tokens.tokens import Tokens
 
 
 def main():
@@ -28,10 +28,9 @@ def main():
                 break
 
             session.text = Text(session, text)
-            session.notes = Notes(session)
+            session.tokens = Tokens(session)
 
-            selected_note_indices = session.user.select_notes()
-            session.anki.add_notes(selected_note_indices)
+            selected_token_indices = session.user.select_tokens()
 
 
 if __name__ == "__main__":

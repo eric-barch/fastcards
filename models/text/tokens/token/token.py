@@ -1,32 +1,35 @@
-class Note:
-    def __init__(self, session, token):
+class Token:
+    def __init__(self, session, spacy_token, openai_token):
         self.session = session
-        self.token = token
-        self.source = self.token["source"]
-        self.target = self.token["target"]
-        self.representation = token["representation"]
-        self.start = token["start"]
-        self.end = token["end"]
-        self.lemma = token["lemma"]
-        self.exists = self.check_if_exists()
 
-        self.pos_source, self.pos_target = self.get_pos_source_and_target()
-        self.gender_source, self.gender_target = self.get_gender_source_and_target()
-        self.number_source, self.number_target = self.get_number_source_and_target()
+        self.spacy_token = spacy_token
+        self.openai_token = openai_token
 
-    def __repr__(self):
-        indent = 5
-        column_width = 30
+        self.representation = self.spacy_token.representation
+        self.source = self.openai_token.source
+        self.target = self.openai_token.target
+        self.pos = self.openai_token.pos
+        self.gender = self.openai_token.gender
+        self.number = self.openai_token.number
 
-        parts = [
-            f"source: {self.source:<{22}}target: {self.target}",
-            f"{'':<{indent}}{'pos_source: ' + self.pos_source:<{column_width}}pos_target: {self.pos_target}",
-            f"{'':<{indent}}{'gender_source: ' + self.gender_source:<{column_width}}gender_target: {self.gender_target}",
-            f"{'':<{indent}}{'number_source: ' + self.number_source:<{column_width}}number_target: {self.number_target}",
-            f"{'':<{indent}}{'already_exists: ' + str(self.exists)}",
-        ]
+    def __repr__(self, number, indent, column_width, row_labels):
+        lines = []
 
-        return "\n".join(parts)
+        for row_label in row_labels:
+            values = [
+                str(getattr(self.spacy_token, row_label, "None")),
+                str(getattr(self.openai_token, row_label, "None")),
+                str(getattr(self, row_label, "None")),
+            ]
+
+            line = f"{'':<{indent}}{row_label + ':':<{column_width}}{values[0]:<{column_width}}{values[1]:<{column_width}}{values[2]}"
+            lines.append(line)
+
+        number_string = f"{number}."
+
+        lines[0] = number_string + lines[0][len(number_string) :]
+
+        return f"{lines[0]}\n" + "\n".join(lines[1:])
 
     def get_pos_source_and_target(self):
         pos_target_to_source = {
