@@ -21,16 +21,25 @@ class Tokens(list):
         self.create_tokens(spacy_tokens, openai_tokens)
 
     def __repr__(self):
-        repr = "\n"
+        indent = 5
+        column_width = 20
+
+        row_labels = ["representation", "source", "target", "pos", "gender", "number"]
+
+        header_line = f"\n{'':<{indent}}{'':<{column_width}}{'spacy':<{column_width}}{'openai':<{column_width}}{'merged'}"
+
+        repr_str = header_line
 
         for i, token in enumerate(self):
-            number = f"\n{i + 1}."
-            repr += f"{number:<6}{token}"
+            token_repr = token.__repr__(
+                number=i + 1,
+                indent=indent,
+                column_width=column_width,
+                row_labels=row_labels,
+            )
+            repr_str += "\n\n" + token_repr
 
-            if i != len(self) - 1:
-                repr += "\n"
-
-        return repr
+        return repr_str
 
     def get_spacy_tokens(self):
         source = self.text.source

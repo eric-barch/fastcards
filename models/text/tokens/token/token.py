@@ -1,37 +1,35 @@
 class Token:
     def __init__(self, session, spacy_token, openai_token):
         self.session = session
+
         self.spacy_token = spacy_token
         self.openai_token = openai_token
 
-    def __repr__(self):
-        indent = 5
-        column_width = 30
+        self.representation = self.spacy_token.representation
+        self.source = self.openai_token.source
+        self.target = self.openai_token.target
+        self.pos = self.openai_token.pos
+        self.gender = self.openai_token.gender
+        self.number = self.openai_token.number
 
-        representation = self.spacy_token.representation
-        target = self.openai_token.target
+    def __repr__(self, number, indent, column_width, row_labels):
+        lines = []
 
-        spacy_source = str(self.spacy_token.source)
-        openai_source = str(self.openai_token.source)
+        for row_label in row_labels:
+            values = [
+                str(getattr(self.spacy_token, row_label, "None")),
+                str(getattr(self.openai_token, row_label, "None")),
+                str(getattr(self, row_label, "None")),
+            ]
 
-        spacy_pos = str(self.spacy_token.pos)
-        openai_pos = str(self.openai_token.pos)
+            line = f"{'':<{indent}}{row_label + ':':<{column_width}}{values[0]:<{column_width}}{values[1]:<{column_width}}{values[2]}"
+            lines.append(line)
 
-        spacy_gender = str(self.spacy_token.gender)
-        openai_gender = str(self.openai_token.gender)
+        number_string = f"{number}."
 
-        spacy_number = str(self.spacy_token.number)
-        openai_number = str(self.openai_token.number)
+        lines[0] = number_string + lines[0][len(number_string) :]
 
-        parts = [
-            f"representation: {representation:<{14}}target: {target}",
-            f"{'':<{indent}}{'spacy_source: ' + spacy_source:<{column_width}}{'openai_source: ' + openai_source}",
-            f"{'':<{indent}}{'spacy_pos: ' + spacy_pos:<{column_width}}{'openai_pos: ' + openai_pos}",
-            f"{'':<{indent}}{'spacy_gender: ' + spacy_gender:<{column_width}}{'openai_gender: ' + openai_gender}",
-            f"{'':<{indent}}{'spacy_number: ' + spacy_number:<{column_width}}{'openai_number: ' + openai_number}",
-        ]
-
-        return "\n".join(parts)
+        return f"{lines[0]}\n" + "\n".join(lines[1:])
 
     def get_pos_source_and_target(self):
         pos_target_to_source = {
