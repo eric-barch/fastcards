@@ -1,7 +1,6 @@
-import json
-
 import spacy
 
+from .token.token import Token
 from .token.spacy_token import SpacyToken
 from .token.openai_token import OpenAiToken
 
@@ -19,7 +18,7 @@ class Tokens(list):
         spacy_tokens = self.get_spacy_tokens()
         openai_tokens = self.get_openai_tokens(spacy_tokens)
 
-        # self.create_tokens(spacy_tokens, openai_tokens)
+        self.create_tokens(spacy_tokens, openai_tokens)
 
     def __repr__(self):
         repr = "\n"
@@ -163,6 +162,8 @@ class Tokens(list):
         if len(spacy_tokens) != len(openai_tokens):
             raise Exception("spacy_tokens is not the same length as openai_tokens")
 
-        # Add details from both tokens to token and add to self
+        for i, spacy_token in enumerate(spacy_tokens):
+            token = Token(self.session, spacy_token, openai_tokens[i])
+            self.append(token)
 
         return self
