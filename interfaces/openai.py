@@ -78,9 +78,9 @@ class OpenAi:
             {
                 "source": corrected "source",
                 "target": English translation of crrected "source" (NOT "representation"),
-                "pos": part of speech of corrected "source" (choose from options below),
-                "gender": gender of corrected "source", if any,
-                "number": number of corrected "source", if any
+                "pos": part of speech of corrected "source" (choose from below),
+                "gender": gender of corrected "source", if any (choose from below),
+                "number": number of corrected "source", if any (choose from below)
             }
 
             "pos" options:
@@ -103,6 +103,15 @@ class OpenAi:
                 "verb",
                 "other",
                 "space"
+            
+            "gender" options:
+                "masculine",
+                "feminine",
+                "neuter",
+            
+            "number" options:
+                "singular",
+                "plural"
             
             Below are some examples of an input string with the relevant token bracketed, and the 
             correct output object for that token.

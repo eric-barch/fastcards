@@ -24,7 +24,7 @@ def main():
                 exit = True
                 break
 
-            session.text = Text(session, text)
+            Text(session, text)
 
             selected_token_indices = session.user.select_tokens()
 
