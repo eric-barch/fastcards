@@ -9,4 +9,3 @@ class Session:
         self.anki = Anki(self)
         self.openai = OpenAi(self)
         self.text = None
-        self.tokens = None

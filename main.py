@@ -1,13 +1,11 @@
 from models.session import Session
 from models.text.text import Text
-from models.text.tokens.tokens import Tokens
 
 
 def main():
     session = Session()
 
     exit = False
-
     while not exit:
         read_deck_name, write_deck_name = session.user.select_deck_names()
 
@@ -15,7 +13,6 @@ def main():
         session.anki.write_deck_name = write_deck_name
 
         restart = False
-
         while not restart:
             text = session.user.enter_text()
 
@@ -28,7 +25,6 @@ def main():
                 break
 
             session.text = Text(session, text)
-            session.tokens = Tokens(session)
 
             selected_token_indices = session.user.select_tokens()
 
