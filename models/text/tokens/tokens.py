@@ -1,8 +1,8 @@
 import spacy
 
 from .token.token import Token
-from .token.spacy_token import SpacyToken
-from .token.openai_token import OpenAiToken
+from .token.specialized_tokens.spacy_token import SpacyToken
+from .token.specialized_tokens.openai_token import OpenAiToken
 
 nlp = spacy.load("fr_core_news_sm")
 
@@ -11,9 +11,7 @@ class Tokens(list):
     def __init__(self, session):
         super().__init__()
         self.session = session
-
-        self.text = session.text
-        self.text.notes = self
+        self.text = self.session.text
 
         spacy_tokens = self.get_spacy_tokens()
         openai_tokens = self.get_openai_tokens(spacy_tokens)
@@ -172,7 +170,7 @@ class Tokens(list):
             raise Exception("spacy_tokens is not the same length as openai_tokens")
 
         for i, spacy_token in enumerate(spacy_tokens):
-            token = Token(self.session, spacy_token, openai_tokens[i])
+            token = Token(self.text, spacy_token, openai_tokens[i])
             self.append(token)
 
         return self

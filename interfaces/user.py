@@ -51,7 +51,7 @@ class User:
         return user_input
 
     def select_tokens(self):
-        tokens = self.session.tokens
+        tokens = self.session.text.tokens
 
         print(f"\nExtracted tokens:\n{tokens}")
 
