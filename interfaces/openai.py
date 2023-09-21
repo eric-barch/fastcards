@@ -25,7 +25,7 @@ class OpenAi:
         )
         return response.choices[0].message.content
 
-    def get_text_source_and_target_system_prompt(self):
+    def get_source_and_target_system_prompt(self):
         return """
             You will receive a string in French (the source language). Return a JSON object with a 
             "source" field, containing a cleaned up version of the input string (correct 
@@ -41,11 +41,15 @@ class OpenAi:
             }
         """
 
-    def get_text_source_and_target(self, text):
-        system_prompt = self.get_text_source_and_target_system_prompt()
+    def get_source_and_target(self, text):
+        system_prompt = self.get_source_and_target_system_prompt()
         response_str = self.call_api(system_prompt, text)
         response_obj = json.loads(response_str)
-        return response_obj
+
+        source = response_obj["source"]
+        target = response_obj["target"]
+
+        return source, target
 
     def get_tokens_system_prompt(self):
         return """
