@@ -36,39 +36,29 @@ class Anki:
         return response
 
     def add_note(self, note):
-        return self.call_api(
-            "addNote",
-            note={
-                "deckName": self.write_deck_name,
-                "modelName": "Forward and Reverse with Grammatical Detail (Type Answer)",
-                "fields": {
-                    "source": note.source,
-                    "target": note.target,
-                    "pos_source": note.pos_source,
-                    "pos_target": note.pos_target,
-                    "gender_source": note.gender_source,
-                    "gender_target": note.gender_target,
-                    "number_source": note.number_source,
-                    "number_target": note.number_target,
-                },
-                "options": {"allowDuplicate": False},
-                "tags": [],
-            },
-        )
-
-    def add_notes(self, selected_note_indices):
-        print()
-
-        for selected_note_index in selected_note_indices:
-            note = self.session.notes[selected_note_index]
-
+        try:
             if note.pos_target == "proper noun":
                 print(f"Skipped {note.source} (proper noun)")
-                continue
+                return
 
-            try:
-                self.add_note(
-                    note,
-                )
-            except:
-                print(f"Skipped {note.source} (already exists)")
+            return self.call_api(
+                "addNote",
+                note={
+                    "deckName": self.write_deck_name,
+                    "modelName": "Forward and Reverse with Grammatical Detail (Type Answer)",
+                    "fields": {
+                        "source": note.source,
+                        "target": note.target,
+                        "pos_source": note.pos_source,
+                        "pos_target": note.pos_target,
+                        "gender_source": note.gender_source,
+                        "gender_target": note.gender_target,
+                        "number_source": note.number_source,
+                        "number_target": note.number_target,
+                    },
+                    "options": {"allowDuplicate": False},
+                    "tags": [],
+                },
+            )
+        except Exception as e:
+            print(f"Skipped {note.source} ({e})")

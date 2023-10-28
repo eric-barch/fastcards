@@ -6,7 +6,7 @@ class Note:
         self.gender_source, self.gender_target = self.get_gender_source_and_target(
             token.gender
         )
-        self.number_source, self.gender_target = self.get_number_source_and_target(
+        self.number_source, self.number_target = self.get_number_source_and_target(
             token.number
         )
 

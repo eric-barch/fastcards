@@ -13,3 +13,10 @@ class Text:
         print(f"target: {self.target}")
 
         self.tokens = Tokens(self.session)
+
+    def add_notes(self, selected_token_indices):
+        for selected_token_index in selected_token_indices:
+            token = self.tokens[selected_token_index]
+            self.session.anki.add_note(
+                token.note,
+            )
