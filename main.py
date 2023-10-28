@@ -28,6 +28,8 @@ def main():
 
             selected_token_indices = session.user.select_tokens()
 
+            session.text.add_notes(selected_token_indices)
+
 
 if __name__ == "__main__":
     main()
