@@ -1,11 +1,13 @@
 from interfaces.anki_interface import AnkiInterface
 from interfaces.user_interface import UserInterface
+from interfaces.open_ai_interface import OpenAiInterface
 from models.tokens import Tokens
 
 
 def main():
     anki_interface = AnkiInterface()
     user_interface = UserInterface()
+    open_ai_interface = OpenAiInterface()
 
     exit = False
 
@@ -32,7 +34,7 @@ def main():
             anki_interface.check_for_existing_notes(tokens)
             user_interface.select_tokens_to_look_up(tokens)
 
-            notes = openai_interface.define_tokens(input, tokens)
+            notes = open_ai_interface.define_tokens(input, tokens)
 
             anki_interface.add_notes(notes)
 
