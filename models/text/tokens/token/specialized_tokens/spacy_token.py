@@ -1,10 +1,6 @@
 class SpacyToken:
-    def __init__(self, representation, source, start, end, lemma, pos, gender, number):
+    def __init__(self, representation, lemma, start, end):
         self.representation = representation
-        self.source = source
+        self.lemma = lemma
         self.start = start
         self.end = end
-        self.lemma = lemma
-        self.pos = pos
-        self.gender = gender
-        self.number = number

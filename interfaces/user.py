@@ -44,7 +44,7 @@ class User:
 
         return choice
 
-    def enter_text(self):
+    def enter_input(self):
         user_input = input(
             "\nEnter a string in the source language ('restart' to change decks, 'exit' to quit):\n\n"
         )

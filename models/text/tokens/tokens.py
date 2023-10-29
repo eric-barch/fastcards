@@ -4,19 +4,26 @@ from .token.token import Token
 from .token.specialized_tokens.spacy_token import SpacyToken
 from .token.specialized_tokens.openai_token import OpenAiToken
 
-nlp = spacy.load("fr_core_news_sm")
+nlp = spacy.load("fr_dep_news_trf")
 
 
 class Tokens(list):
-    def __init__(self, session):
+    def __init__(self, session, text):
         super().__init__()
         self.session = session
-        self.text = self.session.text
+        self.text = text
 
         spacy_tokens = self.get_spacy_tokens()
-        openai_tokens = self.get_openai_tokens(spacy_tokens)
 
-        self.create_tokens(spacy_tokens, openai_tokens)
+        print()
+        for spacy_token in spacy_tokens:
+            print(
+                f"{spacy_token.representation:<{15}}{spacy_token.lemma:<{15}}{spacy_token.start:<{10}}{spacy_token.end:<{10}}"
+            )
+
+        # openai_tokens = self.get_openai_tokens(spacy_tokens)
+
+        # self.create_tokens(spacy_tokens, openai_tokens)
 
     def __repr__(self):
         indent = 5
@@ -50,90 +57,16 @@ class Tokens(list):
             if parsed_object.pos_ == "PUNCT":
                 continue
 
-            pos = self.get_pos_string(parsed_object.pos_)
-
-            morph = parsed_object.morph.to_dict()
-
-            gender_abbr = morph.get("Gender")
-            gender = self.get_gender_string(gender_abbr) if gender_abbr else None
-
-            number_abbr = morph.get("Number")
-            number = self.get_number_string(number_abbr) if number_abbr else None
-
             spacy_token = SpacyToken(
                 parsed_object.text,
-                self.get_source(parsed_object),
+                parsed_object.lemma_,
                 parsed_object.idx,
                 parsed_object.idx + len(parsed_object.text),
-                parsed_object.lemma,
-                pos,
-                gender,
-                number,
             )
 
             spacy_tokens.append(spacy_token)
 
         return spacy_tokens
-
-    def get_source(self, parsed_object):
-        is_contraction_part = parsed_object.text.endswith("'")
-        is_inverted_subject_pron = parsed_object.text.startswith("-")
-        is_verb = self.get_pos_string(parsed_object.pos_) == "verb"
-        is_proper_noun = self.get_pos_string(parsed_object.pos_) == "proper noun"
-
-        lemma_front = is_contraction_part or is_inverted_subject_pron or is_verb
-
-        if lemma_front:
-            front = parsed_object.lemma_
-        else:
-            front = parsed_object.text
-
-        if is_proper_noun:
-            return front.capitalize()
-        else:
-            return front.lower()
-
-    def get_pos_string(self, abbreviation):
-        pos = {
-            "ADJ": "adjective",
-            "ADP": "adposition",
-            "ADV": "adverb",
-            "AUX": "auxiliary",
-            "CONJ": "conjunction",
-            "CCONJ": "coord conj",
-            "DET": "determiner",
-            "INTJ": "interjection",
-            "NOUN": "noun",
-            "NUM": "numeral",
-            "PART": "particle",
-            "PRON": "pronoun",
-            "PROPN": "proper noun",
-            "PUNCT": "punctuation",
-            "SCONJ": "subord conj",
-            "SYM": "symbol",
-            "VERB": "verb",
-            "X": "other",
-            "SPACE": "space",
-        }
-
-        return pos[abbreviation.upper()]
-
-    def get_gender_string(self, abbreviation):
-        gender = {
-            "MASC": "masculine",
-            "FEM": "feminine",
-            "NEUT": "neuter",
-        }
-
-        return gender[abbreviation.upper()]
-
-    def get_number_string(self, abbreviation):
-        number = {
-            "SING": "singular",
-            "PLUR": "plural",
-        }
-
-        return number[abbreviation.upper()]
 
     def get_openai_tokens(self, spacy_tokens):
         request_string = self.text.source

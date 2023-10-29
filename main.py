@@ -14,21 +14,21 @@ def main():
 
         restart = False
         while not restart:
-            text = session.user.enter_text()
+            input = session.user.enter_input()
 
-            if text.lower().strip() == "restart":
+            if input.lower().strip() == "restart":
                 restart = True
                 break
 
-            if text.lower().strip() == "exit":
+            if input.lower().strip() == "exit":
                 exit = True
                 break
 
-            Text(session, text)
+            Text(session, input)
 
-            selected_token_indices = session.user.select_tokens()
+            # selected_token_indices = session.user.select_tokens()
 
-            session.text.add_notes(selected_token_indices)
+            # session.text.add_notes(selected_token_indices)
 
 
 if __name__ == "__main__":
