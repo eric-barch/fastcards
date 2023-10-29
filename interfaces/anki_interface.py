@@ -1,5 +1,6 @@
 import json
 import urllib.request
+from models.note import Note
 
 
 class AnkiInterface:
@@ -28,46 +29,21 @@ class AnkiInterface:
     def get_all_decks(self):
         return self.call_api("deckNames")
 
-    def set_decks(self, read_deck, write_deck):
+    def set_read_and_write_decks(self, read_deck, write_deck):
         self.read_deck = read_deck
         self.write_deck = write_deck
 
-    def check_for_existing(self, tokens):
+    def check_for_existing_notes(self, tokens):
         for token in tokens:
-            existing_representations = self.find_notes(token.representation)
-            existing_lemmas = self.find_notes(token.lemma)
-            print(f"{token.representation} {existing_representations}")
-            print(f"{token.lemma} {existing_lemmas}")
+            self.find_notes(token.representation)
+            self.find_notes(token.lemma)
 
-    def find_notes(self, front):
-        query = f'deck:"{self.read_deck}" source:"{front}"'
+    def find_notes(self, potential_note):
+        query = f'deck:"{self.read_deck}" source:"{potential_note.text}"'
         response = self.call_api("findNotes", query=query)
-        return response
-
-    def add_note(self, note):
-        try:
-            if note.pos_target == "proper noun":
-                print(f"Skipped {note.source} (proper noun)")
-                return
-
-            return self.call_api(
-                "addNote",
-                note={
-                    "deckName": self.write_deck,
-                    "modelName": "Forward and Reverse with Grammatical Detail (Type Answer)",
-                    "fields": {
-                        "source": note.source,
-                        "target": note.target,
-                        "pos_source": note.pos_source,
-                        "pos_target": note.pos_target,
-                        "gender_source": note.gender_source,
-                        "gender_target": note.gender_target,
-                        "number_source": note.number_source,
-                        "number_target": note.number_target,
-                    },
-                    "options": {"allowDuplicate": False},
-                    "tags": [],
-                },
-            )
-        except Exception as e:
-            print(f"Skipped {note.source} ({e})")
+        if response:
+            notes_info = self.call_api("notesInfo", notes=response)
+            for note_info in notes_info:
+                fields = note_info.get("fields")
+                existing_note = Note(fields.get("source"), fields.get("target"))
+                potential_note.existing_notes.append(existing_note)
