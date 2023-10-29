@@ -2,12 +2,10 @@ import json
 import urllib.request
 
 
-class Anki:
-    def __init__(self, session):
-        self.session = session
-        session.anki = self
-        self.read_deck_name = None
-        self.write_deck_name = None
+class AnkiInterface:
+    def __init__(self):
+        self.read_deck = None
+        self.write_deck = None
 
     def call_api(self, action, **params):
         request = {"action": action, "params": params, "version": 6}
@@ -27,11 +25,22 @@ class Anki:
             raise Exception(response["error"])
         return response["result"]
 
-    def get_all_deck_names(self):
+    def get_all_decks(self):
         return self.call_api("deckNames")
 
-    def find_notes(self, source):
-        query = f'deck:"{self.read_deck_name}" source:"{source}"'
+    def set_decks(self, read_deck, write_deck):
+        self.read_deck = read_deck
+        self.write_deck = write_deck
+
+    def check_for_existing(self, tokens):
+        for token in tokens:
+            existing_representations = self.find_notes(token.representation)
+            existing_lemmas = self.find_notes(token.lemma)
+            print(f"{token.representation} {existing_representations}")
+            print(f"{token.lemma} {existing_lemmas}")
+
+    def find_notes(self, front):
+        query = f'deck:"{self.read_deck}" source:"{front}"'
         response = self.call_api("findNotes", query=query)
         return response
 
@@ -44,7 +53,7 @@ class Anki:
             return self.call_api(
                 "addNote",
                 note={
-                    "deckName": self.write_deck_name,
+                    "deckName": self.write_deck,
                     "modelName": "Forward and Reverse with Grammatical Detail (Type Answer)",
                     "fields": {
                         "source": note.source,
