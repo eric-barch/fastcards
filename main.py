@@ -31,10 +31,10 @@ def main():
 
             tokens = Tokens(input)
 
-            anki_interface.check_for_existing_notes(tokens)
-            user_interface.select_tokens_to_look_up(tokens)
+            anki_interface.check_for_existing(tokens)
+            user_interface.mark_for_lookup(tokens)
 
-            notes = open_ai_interface.define_tokens(input, tokens)
+            notes = open_ai_interface.look_up(input, tokens)
 
             anki_interface.add_notes(notes)
 
