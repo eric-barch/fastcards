@@ -14,7 +14,7 @@ def main():
     while not exit:
         all_decks = anki_interface.get_all_decks()
         read_deck, write_deck = user_interface.select_decks(all_decks)
-        anki_interface.set_decks(read_deck, write_deck)
+        anki_interface.set_read_and_write_decks(read_deck, write_deck)
 
         restart = False
 
@@ -31,12 +31,12 @@ def main():
 
             tokens = Tokens(input)
 
-            anki_interface.check_for_existing(tokens)
-            user_interface.mark_for_lookup(tokens)
+            anki_interface.check_for_existing_notes(tokens)
+            # user_interface.mark_for_lookup(tokens)
 
-            notes = open_ai_interface.look_up(input, tokens)
+            # notes = open_ai_interface.look_up(input, tokens)
 
-            anki_interface.add_notes(notes)
+            # anki_interface.add_notes(notes)
 
 
 if __name__ == "__main__":
