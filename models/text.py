@@ -1,4 +1,4 @@
-from models.text.tokens.tokens import Tokens
+from models.tokens import Tokens
 
 
 class Text:
