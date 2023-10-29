@@ -1,20 +1,19 @@
-from models.session import Session
-from models.text.text import Text
+from interfaces.user_interface import UserInterface
+from interfaces.anki_interface import AnkiInterface
+from models.text import Text
 
 
 def main():
-    session = Session()
+    user_interface = UserInterface()
 
     exit = False
     while not exit:
-        read_deck_name, write_deck_name = session.user.select_deck_names()
+        read_deck_name, write_deck_name = user_interface.select_deck_names()
 
-        session.anki.read_deck_name = read_deck_name
-        session.anki.write_deck_name = write_deck_name
+        anki_interface = AnkiInterface(read_deck_name, write_deck_name)
 
-        restart = False
         while not restart:
-            input = session.user.enter_input()
+            input = user_interface.request_input()
 
             if input.lower().strip() == "restart":
                 restart = True
@@ -24,7 +23,7 @@ def main():
                 exit = True
                 break
 
-            Text(session, input)
+            text = Text(session, input)
 
             # selected_token_indices = session.user.select_tokens()
 

@@ -1,8 +1,8 @@
 import spacy
 
-from .token.token import Token
-from .token.specialized_tokens.spacy_token import SpacyToken
-from .token.specialized_tokens.openai_token import OpenAiToken
+from .token import Token
+from .spacy_token import SpacyToken
+from .openai_token import OpenAiToken
 
 nlp = spacy.load("fr_dep_news_trf")
 

@@ -2,12 +2,10 @@ import json
 import urllib.request
 
 
-class Anki:
-    def __init__(self, session):
-        self.session = session
-        session.anki = self
-        self.read_deck_name = None
-        self.write_deck_name = None
+class AnkiInterface:
+    def __init__(self, read_deck_name, write_deck_name):
+        self.read_deck_name = read_deck_name
+        self.write_deck_name = write_deck_name
 
     def call_api(self, action, **params):
         request = {"action": action, "params": params, "version": 6}
