@@ -32,8 +32,15 @@ class AnkiInterface:
         self.read_deck = read_deck
         self.write_deck = write_deck
 
-    def find_notes(self, source):
-        query = f'deck:"{self.read_deck}" source:"{source}"'
+    def check_for_existing(self, tokens):
+        for token in tokens:
+            existing_representations = self.find_notes(token.representation)
+            existing_lemmas = self.find_notes(token.lemma)
+            print(f"{token.representation} {existing_representations}")
+            print(f"{token.lemma} {existing_lemmas}")
+
+    def find_notes(self, front):
+        query = f'deck:"{self.read_deck}" source:"{front}"'
         response = self.call_api("findNotes", query=query)
         return response
 
