@@ -1,19 +1,23 @@
-from interfaces.user_interface import UserInterface
 from interfaces.anki_interface import AnkiInterface
-from models.text import Text
+from interfaces.user_interface import UserInterface
+from models.tokens import Tokens
 
 
 def main():
+    anki_interface = AnkiInterface()
     user_interface = UserInterface()
 
     exit = False
-    while not exit:
-        read_deck_name, write_deck_name = user_interface.select_deck_names()
 
-        anki_interface = AnkiInterface(read_deck_name, write_deck_name)
+    while not exit:
+        all_decks = anki_interface.get_all_decks()
+        read_deck, write_deck = user_interface.select_decks(all_decks)
+        anki_interface.set_decks(read_deck, write_deck)
+
+        restart = False
 
         while not restart:
-            input = user_interface.request_input()
+            input = user_interface.enter_input()
 
             if input.lower().strip() == "restart":
                 restart = True
@@ -23,11 +27,14 @@ def main():
                 exit = True
                 break
 
-            text = Text(session, input)
+            tokens = Tokens(input)
 
-            # selected_token_indices = session.user.select_tokens()
+            anki_interface.check_for_existing_notes(tokens)
+            user_interface.select_tokens_to_look_up(tokens)
 
-            # session.text.add_notes(selected_token_indices)
+            notes = openai_interface.define_tokens(input, tokens)
+
+            anki_interface.add_notes(notes)
 
 
 if __name__ == "__main__":

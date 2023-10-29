@@ -3,9 +3,9 @@ import urllib.request
 
 
 class AnkiInterface:
-    def __init__(self, read_deck_name, write_deck_name):
-        self.read_deck_name = read_deck_name
-        self.write_deck_name = write_deck_name
+    def __init__(self):
+        self.read_deck = None
+        self.write_deck = None
 
     def call_api(self, action, **params):
         request = {"action": action, "params": params, "version": 6}
@@ -25,11 +25,15 @@ class AnkiInterface:
             raise Exception(response["error"])
         return response["result"]
 
-    def get_all_deck_names(self):
+    def get_all_decks(self):
         return self.call_api("deckNames")
 
+    def set_decks(self, read_deck, write_deck):
+        self.read_deck = read_deck
+        self.write_deck = write_deck
+
     def find_notes(self, source):
-        query = f'deck:"{self.read_deck_name}" source:"{source}"'
+        query = f'deck:"{self.read_deck}" source:"{source}"'
         response = self.call_api("findNotes", query=query)
         return response
 
@@ -42,7 +46,7 @@ class AnkiInterface:
             return self.call_api(
                 "addNote",
                 note={
-                    "deckName": self.write_deck_name,
+                    "deckName": self.write_deck,
                     "modelName": "Forward and Reverse with Grammatical Detail (Type Answer)",
                     "fields": {
                         "source": note.source,
