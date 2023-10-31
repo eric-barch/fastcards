@@ -35,14 +35,27 @@ class AnkiInterface:
 
     def check_for_existing_notes(self, tokens):
         for token in tokens:
-            self.find_notes(token.text)
-            self.find_notes(token.lemma)
+            query = f'deck:"{self.read_deck}" source:"{token.text}" or source:"{token.lemma}"'
+            response = self.call_api("findNotes", query=query)
+            if response:
+                notes_info = self.call_api("notesInfo", notes=response)
+                for note_info in notes_info:
+                    id = note_info.get("noteId")
+                    fields = note_info.get("fields")
+                    source = fields.get("source").get("value")
+                    target = fields.get("target").get("value")
+                    existing_note = Note(id, source, target)
+                    token.add_existing_note(existing_note)
 
-    def find_notes(self, potential_note):
-        query = f'deck:"{self.read_deck}" source:"{potential_note.text}"'
+    def find_notes(self, text):
+        query = f'deck:"{self.read_deck}" source:"{text}"'
         response = self.call_api("findNotes", query=query)
         if response:
             notes_info = self.call_api("notesInfo", notes=response)
-            fields = notes_info[0].get("fields")
-            potential_note.source = fields.get("source").get("value")
-            potential_note.target = fields.get("target").get("value")
+            for note_info in notes_info:
+                id = note_info.get("noteId")
+                fields = note_info.get("fields")
+                source = fields.get("source").get("value")
+                target = fields.get("target").get("value")
+                existing_note = Note(id, source, target)
+                print(existing_note)
