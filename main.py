@@ -32,9 +32,6 @@ def main():
             tokens = Tokens(input)
 
             anki_interface.check_for_existing_notes(tokens)
-
-            print(f"\n{tokens}")
-
             user_interface.mark_for_lookup(tokens)
 
             # notes = open_ai_interface.look_up(input, tokens)

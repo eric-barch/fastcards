@@ -1,6 +1,5 @@
 import spacy
 
-from global_vars import column_widths
 from models.token import Token
 
 nlp = spacy.load("fr_dep_news_trf")
@@ -33,14 +32,4 @@ class Tokens(list):
         return tokens
 
     def __str__(self):
-        header = (
-            f"{'token':<{column_widths[0]}}"
-            f"{'existing_note_source':<{column_widths[1]}}"
-            f"{'existing_note_target':<{column_widths[2]}}"
-            f"{'lemma':<{column_widths[3]}}"
-            f"{'existing_note_source':<{column_widths[4]}}"
-            f"{'existing_note_target':<{column_widths[5]}}"
-            f"{'pos':<{column_widths[6]}}"
-        )
-        tokens = "\n".join(str(token) for token in self)
-        return f"{header}\n{tokens}"
+        return "\n".join(str(token) for token in self)

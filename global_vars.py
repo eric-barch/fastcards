@@ -1,1 +1,1 @@
-column_widths = [15, 25, 25, 15, 25, 25, 10]
+column_widths = [25, 25, 10]
