@@ -35,7 +35,7 @@ class AnkiInterface:
 
     def check_for_existing_notes(self, tokens):
         for token in tokens:
-            self.find_notes(token.representation)
+            self.find_notes(token.text)
             self.find_notes(token.lemma)
 
     def find_notes(self, potential_note):
@@ -43,7 +43,6 @@ class AnkiInterface:
         response = self.call_api("findNotes", query=query)
         if response:
             notes_info = self.call_api("notesInfo", notes=response)
-            for note_info in notes_info:
-                fields = note_info.get("fields")
-                existing_note = Note(fields.get("source"), fields.get("target"))
-                potential_note.existing_notes.append(existing_note)
+            fields = notes_info[0].get("fields")
+            potential_note.source = fields.get("source").get("value")
+            potential_note.target = fields.get("target").get("value")

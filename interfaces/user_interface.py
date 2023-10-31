@@ -47,3 +47,6 @@ class UserInterface:
             "\nEnter a string in the source language ('restart' to change decks, 'exit' to quit):\n\n"
         )
         return user_input
+
+    def mark_for_lookup(self, tokens):
+        pass
