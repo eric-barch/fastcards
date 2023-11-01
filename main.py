@@ -7,7 +7,7 @@ from models.text import Text
 def main():
     anki_interface = AnkiInterface()
     user_interface = UserInterface()
-    # open_ai_interface = OpenAiInterface()
+    open_ai_interface = OpenAiInterface()
 
     exit = False
 
@@ -33,8 +33,7 @@ def main():
 
             anki_interface.check_for_existing_notes(text)
             user_interface.mark_tokens_for_lookup(text)
-
-            print(text)
+            open_ai_interface.look_up_tokens(text)
 
 
 # notes = open_ai_interface.look_up(input, tokens)
