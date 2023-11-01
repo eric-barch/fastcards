@@ -33,8 +33,8 @@ class AnkiInterface:
         self.read_deck = read_deck
         self.write_deck = write_deck
 
-    def check_for_existing_notes(self, tokens):
-        for token in tokens:
+    def check_for_existing_notes(self, text):
+        for token in text.tokens:
             query = f'deck:"{self.read_deck}" source:"{token.text}" or source:"{token.lemma}"'
             response = self.call_api("findNotes", query=query)
             if response:

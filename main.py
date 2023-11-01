@@ -1,13 +1,13 @@
 from interfaces.anki_interface import AnkiInterface
 from interfaces.user_interface import UserInterface
 from interfaces.open_ai_interface import OpenAiInterface
-from models.tokens import Tokens
+from models.text import Text
 
 
 def main():
     anki_interface = AnkiInterface()
     user_interface = UserInterface()
-    open_ai_interface = OpenAiInterface()
+    # open_ai_interface = OpenAiInterface()
 
     exit = False
 
@@ -29,14 +29,17 @@ def main():
                 exit = True
                 break
 
-            tokens = Tokens(input)
+            text = Text(input)
 
-            anki_interface.check_for_existing_notes(tokens)
-            user_interface.mark_for_lookup(tokens)
+            anki_interface.check_for_existing_notes(text)
+            user_interface.mark_tokens_for_lookup(text)
 
-            # notes = open_ai_interface.look_up(input, tokens)
+            print(text)
 
-            # anki_interface.add_notes(notes)
+
+# notes = open_ai_interface.look_up(input, tokens)
+
+# anki_interface.add_notes(notes)
 
 
 if __name__ == "__main__":

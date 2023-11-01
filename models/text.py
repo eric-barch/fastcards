@@ -5,10 +5,10 @@ from models.token import Token
 nlp = spacy.load("fr_dep_news_trf")
 
 
-class Tokens(list):
+class Text:
     def __init__(self, input):
         super().__init__()
-        self.extend(self.tokenize(input))
+        self.tokens = self.tokenize(input)
 
     def tokenize(self, input):
         nlp_tokens = nlp(input)
@@ -32,4 +32,4 @@ class Tokens(list):
         return tokens
 
     def __str__(self):
-        return "\n".join(str(token) for token in self)
+        return "\n".join(str(token) for token in self.tokens)

@@ -1,3 +1,6 @@
+import inquirer
+
+
 class UserInterface:
     def __init__(self):
         pass
@@ -48,5 +51,20 @@ class UserInterface:
         )
         return user_input
 
-    def mark_for_lookup(self, tokens):
-        pass
+    def mark_tokens_for_lookup(self, text):
+        print()
+
+        tokens = text.tokens
+
+        questions = [
+            inquirer.Checkbox(
+                name="tokens",
+                message="Mark tokens for lookup",
+                choices=[(str(token), i) for i, token in enumerate(tokens)],
+            ),
+        ]
+
+        marked_indices = inquirer.prompt(questions).get("tokens")
+
+        for index in marked_indices:
+            tokens[index].marked_for_lookup = True
