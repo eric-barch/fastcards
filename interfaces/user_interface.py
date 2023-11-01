@@ -61,6 +61,11 @@ class UserInterface:
                 name="tokens",
                 message="Mark tokens for lookup",
                 choices=[(str(token), i) for i, token in enumerate(tokens)],
+                default=[
+                    (i)
+                    for i, token in enumerate(tokens)
+                    if not token.existing_notes and token.pos != "PROPN"
+                ],
             ),
         ]
 
