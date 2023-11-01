@@ -1,3 +1,6 @@
+import inquirer
+
+
 class UserInterface:
     def __init__(self):
         pass
@@ -47,3 +50,26 @@ class UserInterface:
             "\nEnter a string in the source language ('restart' to change decks, 'exit' to quit):\n\n"
         )
         return user_input
+
+    def mark_tokens_for_lookup(self, text):
+        print()
+
+        tokens = text.tokens
+
+        questions = [
+            inquirer.Checkbox(
+                name="tokens",
+                message="Mark tokens for lookup",
+                choices=[(str(token), i) for i, token in enumerate(tokens)],
+                default=[
+                    (i)
+                    for i, token in enumerate(tokens)
+                    if not token.existing_notes and token.pos != "PROPN"
+                ],
+            ),
+        ]
+
+        marked_indices = inquirer.prompt(questions).get("tokens")
+
+        for index in marked_indices:
+            tokens[index].marked_for_lookup = True
