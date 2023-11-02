@@ -29,7 +29,7 @@ class AnkiInterface:
     def get_all_decks(self):
         return self.call_api("deckNames")
 
-    def set_read_and_write_decks(self, read_deck, write_deck):
+    def set_decks(self, read_deck, write_deck):
         self.read_deck = read_deck
         self.write_deck = write_deck
 
