@@ -6,7 +6,7 @@ class Note:
         self.target = target
 
     def __str__(self):
-        return f"{self.source} ({self.pos}): {self.target}"
+        return f"{self.id + ' ' if self.id else ''}{self.source} ({self.pos}): {self.target}"
 
 
 class InflectedNote(Note):
@@ -16,6 +16,4 @@ class InflectedNote(Note):
         self.number = number
 
     def __str__(self):
-        return (
-            f"{self.source} ({self.pos}, {self.gender}, {self.number}): {self.target}"
-        )
+        return f"{self.id + ' ' if self.id else ''}{self.source} ({self.pos}, {self.gender}, {self.number}): {self.target}"
