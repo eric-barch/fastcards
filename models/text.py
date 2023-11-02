@@ -32,7 +32,7 @@ class Text:
 
         return tokens
 
-    def get_marked_text(self):
+    def get_marked_string(self):
         marked_text = self.string
         offset = 0
 
@@ -52,6 +52,15 @@ class Text:
         print(marked_text)
 
         return marked_text
+
+    def get_marked_tokens(self):
+        marked_tokens = []
+
+        for token in self.tokens:
+            if token.marked_for_lookup:
+                marked_tokens.append(token)
+
+        return marked_tokens
 
     def __str__(self):
         return "\n".join(str(token) for token in self.tokens)
