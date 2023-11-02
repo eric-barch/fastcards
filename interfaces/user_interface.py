@@ -6,44 +6,22 @@ class UserInterface:
         pass
 
     def select_decks(self, available_decks):
-        read_deck_name = self.select_deck(
-            "Choose a deck to read for existing notes: ", available_decks
-        )
-        print(f"\nRead deck selected: {read_deck_name}")
-
-        write_deck = self.select_deck(
-            "Choose a deck to write new notes to: ", available_decks
-        )
-        print(f"\nWrite deck selected: {write_deck}")
-
-        return read_deck_name, write_deck
+        read_deck_name = self.select_deck("Select read deck", available_decks)
+        write_deck_name = self.select_deck("Select write deck", available_decks)
+        return read_deck_name, write_deck_name
 
     def select_deck(self, prompt, available_decks):
-        print("\nAll decks:\n")
+        print()
 
-        for i, deck_name in enumerate(available_decks, start=1):
-            print(f"{i}. {deck_name}")
+        questions = [
+            inquirer.List(
+                name="deck",
+                message=prompt,
+                choices=available_decks,
+            ),
+        ]
 
-        while True:
-            user_input = input(f"\n{prompt}")
-
-            result = self.validate_deck_selection(user_input, len(available_decks))
-
-            if result:
-                return available_decks[result - 1]
-
-    def validate_deck_selection(self, user_input, max_value):
-        try:
-            choice = int(user_input)
-        except:
-            print("\nPlease enter a valid number.")
-            return None
-
-        if choice < 1 or choice > max_value:
-            print(f"\nInvalid choice. Please select a number from the list.")
-            return None
-
-        return choice
+        return inquirer.prompt(questions).get("deck")
 
     def enter_input(self):
         user_input = input(
@@ -51,7 +29,7 @@ class UserInterface:
         )
         return user_input
 
-    def mark_tokens_for_lookup(self, text):
+    def select_tokens(self, text):
         print()
 
         tokens = text.tokens
@@ -59,7 +37,7 @@ class UserInterface:
         questions = [
             inquirer.Checkbox(
                 name="tokens",
-                message="Mark tokens for lookup",
+                message="Select tokens to look up",
                 choices=[(str(token), i) for i, token in enumerate(tokens)],
                 default=[
                     (i)
