@@ -31,14 +31,10 @@ def main():
 
             text = Text(input)
 
-            anki_interface.check_for_existing_notes(text)
+            anki_interface.find_existing_notes(text)
             user_interface.mark_tokens_for_lookup(text)
             open_ai_interface.look_up_tokens(text)
-
-
-# notes = open_ai_interface.look_up(input, tokens)
-
-# anki_interface.add_notes(notes)
+            # anki_interface.add_new_notes(text)
 
 
 if __name__ == "__main__":

@@ -8,12 +8,12 @@ class Token:
         self.pos = pos
         self.start = start
         self.end = end
-        self.existing_notes = []
+        self.notes = []
         self.marked_for_lookup = False
 
-    def add_existing_note(self, existing_note):
-        if not any(note.id == existing_note.id for note in self.existing_notes):
-            self.existing_notes.append(existing_note)
+    def add_note(self, new_note):
+        if not any(existing_note.id == new_note.id for existing_note in self.notes):
+            self.notes.append(new_note)
 
     def __str__(self):
         return (
@@ -21,5 +21,5 @@ class Token:
             f"{self.lemma:<{column_widths[1]}}"
             f"{self.pos:<{column_widths[2]}}"
             f"{'marked' if self.marked_for_lookup else '':<{column_widths[3]}}"
-            f"[{', '.join(str(note) for note in self.existing_notes)}]"
+            f"[{', '.join(str(note) for note in self.notes)}]"
         )
