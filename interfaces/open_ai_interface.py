@@ -3,7 +3,7 @@ import os
 
 import openai
 from dotenv import load_dotenv
-
+from global_vars import source_language, target_language
 from models.note import Note, InflectedNote
 
 
@@ -26,12 +26,12 @@ class OpenAiInterface:
         return response.choices[0].message.content
 
     def look_up_tokens(self, text):
-        system_prompt = """
-            You will receive a string in French in which one or more lexical tokens are bound by 
-            square brackets. For each bracketed token, determine the part of speech that token is
-            playing in the string, then return an array of corresponding JSON object.
+        system_prompt = f"""
+            You will receive a string in {source_language} with one or more tokens enclosed in 
+            square brackets. Return an array of JSON objects with token details. Your response array 
+            must have exactly as many items as there are bracketed tokens in the request.
 
-            Choose from the following parts of speech:
+            Classify each token as one of the following parts of speech:
 
             adjective (ADJ)
             adposition (ADP)
@@ -53,37 +53,47 @@ class OpenAiInterface:
             other (X)
             space (SPACE)
 
-            Return a JSON object in the following format for parts of speech NOUN, PROPN, PRON, ADV, 
-            ADJ, ADP:
+            Return the following JSON object for parts of speech NOUN, PROPN, PRON, ADV, ADJ, ADP:
 
-            {
+            {{
                 "token": The token exactly as it appears in the string,
-                "pos": Token's part of speech abbreviation,
-                "source": Token, but lowercase unless a proper noun,
-                "target": English translation of "source",
+                "pos": token's part of speech abbreviation,
+                "source": Almost always the same as token. Lowercase unless a proper noun. If the 
+                        word is truncated in the request string (e.g. as part of a contraction), the
+                        full word.
+                "target": {target_language} translation of source,
                 "gender": "MASC" or "FEM" (e.g. "sa" -> "FEM", "son" -> "MASC"). null if not 
                         applicable.
                 "number": "SING" or "PLUR" (e.g. "papier" -> "SING", "papiers" -> "PLUR"). null if 
                         not applicable.
-            }
+            }}
 
-            Return a JSON object in the following format for all other parts of speech:
+            Return the following JSON object for all other parts of speech:
 
-            {
-                "token": The token between brackets exactly as it appears in the string,
-                "pos": Token's part of speech abbreviation,
-                "source": Token's lemma,
-                "target": English translation of the token's lemma, preceded by "to" if a verb (e.g.
-                        "voir" -> "to see")
-            }
+            {{
+                "token": The token exactly as it appears in the string,
+                "pos": token's part of speech abbreviation,
+                "source": token's lemma,
+                "target": {target_language} translation of token's lemma, preceded by "to" if a verb
+                        (e.g. "voir" -> "to see")
+            }}
         """
 
-        bracketed_string = text.get_marked_string()
+        marked_string = text.get_marked_string()
 
-        response = self.call_api(system_prompt, bracketed_string)
+        print(f"OpenAI request: {marked_string}")
+
+        response = self.call_api(system_prompt, marked_string)
         deserialized_response = json.loads(response)
 
+        print(f"OpenAI response: {json.dumps(deserialized_response, indent=4)}")
+
         marked_tokens = text.get_marked_tokens()
+
+        if len(marked_tokens) != len(deserialized_response):
+            raise ValueError(
+                "response has different number of items than marked_tokens"
+            )
 
         for i, item in enumerate(deserialized_response):
             pos = item.get("pos")
