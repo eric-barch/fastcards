@@ -64,7 +64,7 @@ class UserInterface:
                 default=[
                     (i)
                     for i, token in enumerate(tokens)
-                    if not token.existing_notes and token.pos != "PROPN"
+                    if not token.notes and token.pos != "PROPN"
                 ],
             ),
         ]

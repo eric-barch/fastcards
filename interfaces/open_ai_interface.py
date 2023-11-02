@@ -81,4 +81,5 @@ class OpenAiInterface:
         response_str = self.call_api(system_prompt, bracketed_text)
         response_obj = json.loads(response_str)
 
-        print(response_obj)
+        for item in response_obj:
+            print(item)
