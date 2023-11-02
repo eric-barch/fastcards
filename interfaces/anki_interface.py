@@ -50,7 +50,6 @@ class AnkiInterface:
 
                     note = None
 
-                    # new code here
                     if "gender" in fields:
                         gender = fields.get("gender").get("value")
                         number = fields.get("number").get("value")

@@ -4,6 +4,8 @@ import os
 import openai
 from dotenv import load_dotenv
 
+from models.note import Note, InflectedNote
+
 
 class OpenAiInterface:
     def __init__(self):
@@ -76,10 +78,25 @@ class OpenAiInterface:
             }
         """
 
-        bracketed_text = text.get_marked_text()
+        bracketed_string = text.get_marked_string()
 
-        response_str = self.call_api(system_prompt, bracketed_text)
-        response_obj = json.loads(response_str)
+        response = self.call_api(system_prompt, bracketed_string)
+        deserialized_response = json.loads(response)
 
-        for item in response_obj:
-            print(item)
+        marked_tokens = text.get_marked_tokens()
+
+        for i, item in enumerate(deserialized_response):
+            pos = item.get("pos")
+            source = item.get("source")
+            target = item.get("target")
+
+            note = None
+
+            if "gender" in item:
+                gender = item.get("gender")
+                number = item.get("number")
+                note = InflectedNote(pos, source, target, gender, number)
+            else:
+                note = Note(pos, source, target)
+
+            marked_tokens[i].add_note(note)

@@ -34,6 +34,12 @@ def main():
             anki_interface.find_existing_notes(text)
             user_interface.mark_tokens_for_lookup(text)
             open_ai_interface.look_up_tokens(text)
+
+            print()
+            for token in text.tokens:
+                if token.marked_for_lookup:
+                    print(token)
+
             # anki_interface.add_new_notes(text)
 
 
