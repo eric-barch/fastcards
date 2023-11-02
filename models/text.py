@@ -49,8 +49,6 @@ class Text:
                 )
                 offset += 2  # account for the added brackets
 
-        print(marked_text)
-
         return marked_text
 
     def get_marked_tokens(self):
