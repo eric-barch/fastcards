@@ -37,7 +37,7 @@ class Text:
         offset = 0
 
         for token in self.tokens:
-            if token.marked_for_lookup:
+            if token.will_look_up:
                 start = token.start + offset
                 end = token.end + offset
                 marked_text = (
@@ -55,7 +55,7 @@ class Text:
         marked_tokens = []
 
         for token in self.tokens:
-            if token.marked_for_lookup:
+            if token.will_look_up:
                 marked_tokens.append(token)
 
         return marked_tokens
