@@ -4,7 +4,7 @@ import os
 import openai
 from dotenv import load_dotenv
 from global_vars import source_language, target_language
-from models.note import Note, InflectedNote
+from models.note import Note
 
 
 class OpenAiInterface:
@@ -27,23 +27,21 @@ class OpenAiInterface:
 
     def look_up_tokens(self, text):
         system_prompt = f"""
-            You will receive a request in {source_language}. Return an array with {target_language}
-            translation and other lexical information for the selected tokens. Below is an example
-            of a full request and full response.
+            You will receive a string in {source_language}. Return an array of JSON objects for 
+            each of the bracketed tokens. Each JSON object should include fields "token", "pos",
+            "source", "target", "gender", and "number".
 
-            request: {{
-                "terms": [
-                    "onze",
-                    "heures"
-                ],
-                "string": "Je dois prendre le train \u00e0 la gare de King's Cross \u00e0 [onze] [heures]."
-            }}
+            Example full request and desired response:
+
+            request: "Je dois prendre le train à la gare de King's Cross à [onze] [heures]."
             response: [
                 {{
                     "token": "onze",
                     "pos": "NUM",
                     "source": "onze",
                     "target": "eleven",
+                    "gender": null,
+                    "number": null
                 }},
                 {{
                     "token": "heures",
@@ -55,16 +53,19 @@ class OpenAiInterface:
                 }}
             ]
 
-            Below are some more examples of request ITEMS and their desired response ITEM. These are
-            the components that will make up your full response array. They are provided as
-            additional training material.
+            Example request ITEMS and their desired response ITEM. These are the components that 
+            will make up your full response array, provided as additional training material. If the
+            token is a VERB, "source" and "target" should both be in their infinitive form, e.g. 
+            "réveiller" and "to wake up". 
 
             request item: "regardant"
             response item: {{
                 "token": "regardant",
                 "pos": "VERB",
                 "source": "regarder",
-                "target": "to look"
+                "target": "to look",
+                "gender": null,
+                "number": null
             }}
 
             request item: "ronds"
@@ -78,13 +79,13 @@ class OpenAiInterface:
             }}
 
             request item: "C'"
-            response item: {{
+            response item: {{ // note: inferred from string context
                 "token": "C'",
                 "pos": "PRON",
                 "source": "ce",
                 "target": "it",
                 "gender": "MASC",
-                "number": "SING", 
+                "number": "SING"
             }}
 
             request item: "est"
@@ -92,62 +93,84 @@ class OpenAiInterface:
                 "token": "est",
                 "pos": "VERB",
                 "source": "\u00eatre",
-                "target": "to be"
+                "target": "to be",
+                "gender": null,
+                "number": null
             }}
 
-            request item: "tous"
+            request item: "Tous"
             response item: {{
-                "token": "tous",
+                "token": "Tous",
                 "pos": "ADJ",
                 "source": "tous",
                 "target": "all",
                 "gender": "MASC",
-                "number": "PLUR", 
+                "number": "PLUR"
             }}
 
-            request item: "fous"
+            request item: "essayant"
             response item: {{
-                "token": "fous",
-                "pos": "ADJ",
-                "source": "fous",
-                "target": "crazy",
+                "token": "essayant",
+                "pos": "VERB",
+                "source": "essayer",
+                "target": "to try",
+                "gender": null,
+                "number": null
+            }}
+
+            request item: "au"
+            response item: {{
+                "token": "au",
+                "pos": "PREP",
+                "source": "au",
+                "target": "to the",
                 "gender": "MASC",
-                "number": "PLUR", 
+                "number": "SING"
+            }}
+
+            request item: "Inutile"
+            response item: {{
+                "token": "Inutile",
+                "pos": "ADJ",
+                "source": "inutile",
+                "target": "useless",
+                "gender": null,
+                "number": "SING"
+            }},
+
+            request item: "scolaires"
+            response item: {{
+                "token": "scolaires",
+                "pos": "ADJ",
+                "source": "scolaires",
+                "target": "scholastic",
+                "gender": null,
+                "number": "PLUR"
             }}
         """
 
+        print(f"OpenAI request: {text.get_marked_string()}")
+
+        request = text.get_marked_string()
+        response = json.loads(self.call_api(system_prompt, request))
+
+        # for debugging
+        # print(f"OpenAI response: {json.dumps(deserialized_response, indent=4)}")
+
         marked_tokens = text.get_marked_tokens()
-        marked_string = text.get_marked_string()
 
-        request = {
-            "terms": [token.text for token in marked_tokens],
-            "string": marked_string,
-        }
-
-        print(f"OpenAI request: {json.dumps(request, indent=4)}")
-
-        response = self.call_api(system_prompt, marked_string)
-        deserialized_response = json.loads(response)
-
-        print(f"OpenAI response: {json.dumps(deserialized_response, indent=4)}")
-
-        if len(marked_tokens) != len(deserialized_response):
-            raise ValueError(
-                "response has different number of items than marked_tokens"
+        if len(response) != len(marked_tokens):
+            print(
+                f"\n\033[31mWARN:\033[0m received different number of responses than requests sent"
             )
 
-        for i, item in enumerate(deserialized_response):
+        for i, item in enumerate(response):
             pos = item.get("pos")
             source = item.get("source")
             target = item.get("target")
+            gender = item.get("gender")
+            number = item.get("number")
 
-            note = None
-
-            if "gender" in item:
-                gender = item.get("gender")
-                number = item.get("number")
-                note = InflectedNote(pos, source, target, gender, number)
-            else:
-                note = Note(pos, source, target)
+            note = Note(pos, source, target, gender, number)
 
             marked_tokens[i].add_note(note)
