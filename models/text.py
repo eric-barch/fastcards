@@ -60,5 +60,15 @@ class Text:
 
         return marked_tokens
 
+    def get_new_notes(self):
+        new_notes = []
+
+        for token in self.tokens:
+            for note in token.notes:
+                if not note.id:
+                    new_notes.append(note)
+
+        return new_notes
+
     def __str__(self):
         return "\n".join(str(token) for token in self.tokens)
