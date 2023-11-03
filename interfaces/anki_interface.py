@@ -59,15 +59,54 @@ class AnkiInterface:
 
                     token.add_note(note)
 
-    def find_notes(self, text):
-        query = f'deck:"{self.read_deck}" source:"{text}"'
-        response = self.call_api("findNotes", query=query)
-        if response:
-            notes_info = self.call_api("notesInfo", notes=response)
-            for note_info in notes_info:
-                id = note_info.get("noteId")
-                fields = note_info.get("fields")
-                source = fields.get("source").get("value")
-                target = fields.get("target").get("value")
-                existing_note = Note(id, source, target)
-                print(existing_note)
+    def add_notes(self, text):
+        for token in text.tokens:
+            for note in token.notes:
+                if note.will_add:
+                    if isinstance(note, InflectedNote):
+                        anki_note = {
+                            "deckName": self.write_deck,
+                            "modelName": "inflected-french-term",
+                            "fields": {
+                                "source": note.source,
+                                "target": note.target,
+                                "pos": note.pos,
+                                "gender": note.gender if note.gender else "NONE",
+                                "number": note.number if note.number else "NONE",
+                            },
+                            "options": {
+                                "allowDuplicate": False,
+                                "duplicateScope": self.read_deck,
+                            },
+                        }
+
+                        try:
+                            self.call_api("addNote", note=anki_note)
+                        except:
+                            print(
+                                f"Skipped creating note for {note.source} (duplicate)"
+                            )
+                            continue
+                    elif isinstance(note, Note):
+                        anki_note = {
+                            "deckName": self.write_deck,
+                            "modelName": "french-term",
+                            "fields": {
+                                "source": note.source,
+                                "target": note.target,
+                                "pos": note.pos,
+                            },
+                            "options": {
+                                "allowDuplicate": False,
+                                "duplicateScope": self.read_deck,
+                            },
+                        }
+                        self.call_api("addNote", note=anki_note)
+
+                        try:
+                            self.call_api("addNote", note=anki_note)
+                        except:
+                            print(
+                                f"Skipped creating note for {note.source} (duplicate)"
+                            )
+                            continue
