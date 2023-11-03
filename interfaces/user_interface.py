@@ -1,5 +1,7 @@
 import inquirer
 
+from global_vars import source_language
+
 
 class UserInterface:
     def __init__(self):
@@ -25,7 +27,7 @@ class UserInterface:
 
     def enter_input(self):
         user_input = input(
-            "\nEnter a string in the source language ('restart' to change decks, 'exit' to quit):\n\n"
+            f"\nEnter a string in {source_language} ('restart' to change decks, 'exit' to quit):\n\n"
         )
         return user_input
 
@@ -47,7 +49,26 @@ class UserInterface:
             ),
         ]
 
-        marked_indices = inquirer.prompt(questions).get("tokens")
+        indices = inquirer.prompt(questions).get("tokens")
 
-        for index in marked_indices:
-            tokens[index].marked_for_lookup = True
+        for index in indices:
+            tokens[index].will_look_up = True
+
+    def select_notes(self, text):
+        print()
+
+        new_notes = text.get_new_notes()
+
+        questions = [
+            inquirer.Checkbox(
+                name="notes",
+                message="Confirm notes to create",
+                choices=[(str(note), i) for i, note in enumerate(new_notes)],
+                default=[(i) for i, note in enumerate(new_notes)],
+            )
+        ]
+
+        indices = inquirer.prompt(questions).get("notes")
+
+        for index in indices:
+            new_notes[index].will_add = True

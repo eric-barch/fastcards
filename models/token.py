@@ -9,7 +9,7 @@ class Token:
         self.start = start
         self.end = end
         self.notes = []
-        self.marked_for_lookup = False
+        self.will_look_up = False
 
     def add_note(self, new_note):
         if not any(existing_note.id == new_note.id for existing_note in self.notes):
@@ -20,6 +20,6 @@ class Token:
             f"{self.text:<{column_widths[0]}}"
             f"{self.lemma:<{column_widths[1]}}"
             f"{self.pos:<{column_widths[2]}}"
-            f"{'marked' if self.marked_for_lookup else '':<{column_widths[3]}}"
+            f"{'marked' if self.will_look_up else '':<{column_widths[3]}}"
             f"[{', '.join(str(note) for note in self.notes)}]"
         )
