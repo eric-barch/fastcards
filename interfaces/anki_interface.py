@@ -101,7 +101,6 @@ class AnkiInterface:
                                 "duplicateScope": self.read_deck,
                             },
                         }
-                        self.call_api("addNote", note=anki_note)
 
                         try:
                             self.call_api("addNote", note=anki_note)

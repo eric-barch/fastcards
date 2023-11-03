@@ -13,7 +13,6 @@ class OpenAiInterface:
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
     def call_api(self, systemPrompt: str, string: str):
-        print(systemPrompt)
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
@@ -28,124 +27,93 @@ class OpenAiInterface:
 
     def look_up_tokens(self, text):
         system_prompt = f"""
-            # You will receive a JSON object with properties "terms" and "string". "terms" is an array
-            # of selected lexical tokens in the order they appear in "string". "string" is the source 
-            # text of "terms", with each "term" enclosed in square brackets to help you match them up.
-            
-            # Return an array of JSON objects with details for each "term". Your response array must 
-            # have EXACTLY as many items as there are "terms" in the request. If there are duplicate 
-            # "terms" in the request, return duplicate items in your response. NEVER return a JSON 
-            # object for a "term" that is NOT included in "terms" and is NOT bracketed in "string".
-
-            # Classify each "term" as one of the following parts of speech: ADJ, ADP, ADV, AUX, CONJ, 
-            # CCONJ, DET, INTJ, NOUN, NUM, PART, PRON, PROPN, PUNCT, SCONJ, SYM, VERB, X, SPACE
-
-            # Return the following JSON object for "terms" that are parts of speech NOUN, PROPN, PRON, 
-            # ADJ, DET:
-
-            # {{
-            #     "token": Token exactly as it appears in the string,
-            #     "pos": Abbreviation for the part of speech that token is playing in the context
-            #             of "string",
-            #     "source": Almost always the same as token. Always the same inflection. Lowercase 
-            #             unless a proper noun. If the word is truncated in the string (e.g. as part 
-            #             of a contraction), un-truncate it.
-            #     "target": {target_language} translation of source,
-            #     "gender": "MASC" or "FEM" (e.g. "sa" -> "FEM", "son" -> "MASC"). null if not 
-            #             applicable.
-            #     "number": "SING" or "PLUR" (e.g. "papier" -> "SING", "papiers" -> "PLUR"). null if 
-            #             not applicable.
-            # }}
-
-            # Return the following JSON object for "terms" that are all other parts of speech:
-
-            # {{
-            #     "token": Token exactly as it appears in the string,
-            #     "pos": token's part of speech abbreviation,
-            #     "source": token's lemma,
-            #     "target": {target_language} translation of token's lemma, preceded by "to" if a verb
-            #             (e.g. "voir" -> "to see")
-            # }}
-
-            Example requests and desired responses:
-
-            request: {{
-                "terms": ["ne", "sais", "pas", "dit"], 
-                "string": "Je [ne] [sais] [pas], [dit] Harry."
-            }}
-            response: [
-                {{
-                    "token": "ne",
-                    "pos": "ADV",
-                    "source": "ne",
-                    "target": "not"
-                }},
-                {{
-                    "token": "sais",
-                    "pos": "VERB",
-                    "source": "savoir",
-                    "target": "to know"
-                }},
-                {{
-                    "token": "pas",
-                    "pos": "ADV",
-                    "source": "pas",
-                    "target": "not"
-                }},
-                {{
-                    "token": "dit",
-                    "pos": "VERB",
-                    "source": "dire",
-                    "target": "to say"
-                }}
-            ]
+            You will receive a request in {source_language}. Return an array with {target_language}
+            translation and other lexical information for the selected tokens. Below is an example
+            of a full request and full response.
 
             request: {{
                 "terms": [
-                    "Non",
-                    "emm\u00e8ne",
-                    "\u00e0",
-                    "l'",
-                    "h\u00f4pital"
+                    "onze",
+                    "heures"
                 ],
-                "string": "[Non], j'[emm\u00e8ne] Dudley [\u00e0] [l'][h\u00f4pital]."
+                "string": "Je dois prendre le train \u00e0 la gare de King's Cross \u00e0 [onze] [heures]."
             }}
             response: [
                 {{
-                    "token": "Non",
-                    "pos": "INTJ",
-                    "source": "non",
-                    "target": "no",
+                    "token": "onze",
+                    "pos": "NUM",
+                    "source": "onze",
+                    "target": "eleven",
                 }},
                 {{
-                    "token": "emmène",
-                    "pos": "VERB",
-                    "source": "emmener",
-                    "target": "to take",
-                }},
-                {{
-                    "token": "à",
-                    "pos": "ADP",
-                    "source": "à",
-                    "target": "to",
-                }},
-                {{
-                    "token": "l'",
-                    "pos": "DET",
-                    "source": "le",
-                    "target": "the",
-                    "gender": "MASC",
-                    "number": "SING",
-                }},
-                {{
-                    "token": "hôpital",
+                    "token": "heures",
                     "pos": "NOUN",
-                    "source": "hôpital",
-                    "target": "hospital",
-                    "gender": "MASC",
-                    "number": "SING",
+                    "source": "heures",
+                    "target": "hours",
+                    "gender": "FEM",
+                    "number": "PLUR"
                 }}
             ]
+
+            Below are some more examples of request ITEMS and their desired response ITEM. These are
+            the components that will make up your full response array. They are provided as
+            additional training material.
+
+            request item: "regardant"
+            response item: {{
+                "token": "regardant",
+                "pos": "VERB",
+                "source": "regarder",
+                "target": "to look"
+            }}
+
+            request item: "ronds"
+            response item: {{
+                "token": "ronds",
+                "pos": "NOUN",
+                "source": "ronds",
+                "target": "round",
+                "gender": "MASC",
+                "number": "PLUR"
+            }}
+
+            request item: "C'"
+            response item: {{
+                "token": "C'",
+                "pos": "PRON",
+                "source": "ce",
+                "target": "it",
+                "gender": "MASC",
+                "number": "SING", 
+            }}
+
+            request item: "est"
+            response item: {{
+                "token": "est",
+                "pos": "VERB",
+                "source": "\u00eatre",
+                "target": "to be"
+            }}
+
+            request item: "tous"
+            response item: {{
+                "token": "tous",
+                "pos": "ADJ",
+                "source": "tous",
+                "target": "all",
+                "gender": "MASC",
+                "number": "PLUR", 
+            }}
+
+            request item: "fous"
+            response item: {{
+                "token": "fous",
+                "pos": "ADJ",
+                "source": "fous",
+                "target": "crazy",
+                "gender": "MASC",
+                "number": "PLUR", 
+            }}
         """
 
         marked_tokens = text.get_marked_tokens()
@@ -159,9 +127,6 @@ class OpenAiInterface:
         print(f"OpenAI request: {json.dumps(request, indent=4)}")
 
         response = self.call_api(system_prompt, marked_string)
-
-        print(response)
-
         deserialized_response = json.loads(response)
 
         print(f"OpenAI response: {json.dumps(deserialized_response, indent=4)}")
