@@ -54,9 +54,23 @@ class OpenAiInterface:
             ]
 
             Example request ITEMS and their desired response ITEM. These are the components that 
-            will make up your full response array, provided as additional training material. If the
-            token is a VERB, "source" and "target" should both be in their infinitive form, e.g. 
-            "réveiller" and "to wake up". 
+            will make up your full response array, provided as additional training material. 
+            
+            If the token is a VERB, "source" and "target" should both be in their infinitive form, 
+            e.g. "réveiller" and "to wake up". 
+
+            ENSURE THAT YOUR RESPONSE ARRAY ALWAYS CONTAINS EXACTLY THE SAME NUMBER OF ITEMS AS
+            THERE ARE BRACKETED TOKENS IN THE REQUEST STRING.
+
+            request item: "pleine"
+            response item: {{
+                "token": "pleine",
+                "pos": "ADJ",
+                "source": "pleine",
+                "target": "full",
+                "gender": "FEM",
+                "number": "SING"
+            }}
 
             request item: "regardant"
             response item: {{
@@ -155,7 +169,7 @@ class OpenAiInterface:
         response = json.loads(self.call_api(system_prompt, request))
 
         # for debugging
-        # print(f"OpenAI response: {json.dumps(deserialized_response, indent=4)}")
+        # print(f"OpenAI response: {json.dumps(response, indent=4)}")
 
         marked_tokens = text.get_marked_tokens()
 
@@ -171,6 +185,6 @@ class OpenAiInterface:
             gender = item.get("gender")
             number = item.get("number")
 
-            note = Note(pos, source, target, gender, number)
+            note = Note(pos, source, target, None, gender, number)
 
             marked_tokens[i].add_note(note)
