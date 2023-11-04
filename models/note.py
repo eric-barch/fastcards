@@ -1,20 +1,18 @@
 class Note:
-    def __init__(self, pos, source, target, id=None):
-        self.id = id
+    def __init__(self, pos, source, target, id=None, gender=None, number=None):
         self.pos = pos
         self.source = source
         self.target = target
+        self.id = id
+        self.gender = gender
+        self.number = number
         self.will_add = False
 
     def __str__(self):
-        return f"{self.id + ' ' if self.id else ''}{self.source} ({self.pos}): {self.target} {self.will_add}"
-
-
-class InflectedNote(Note):
-    def __init__(self, pos, source, target, gender, number, id=None):
-        super().__init__(pos, source, target, id)
-        self.gender = gender
-        self.number = number
-
-    def __str__(self):
-        return f"{self.id + ' ' if self.id else ''}{self.source} ({self.pos}, {self.gender}, {self.number}): {self.target} {self.will_add}"
+        return (
+            f"{self.source:<15}"
+            + f"{self.target:<15}"
+            + f"{self.pos:<10}"
+            + f"{self.gender if self.gender else 'None':<10}"
+            + f"{self.number if self.number else 'None':<10}"
+        )

@@ -27,7 +27,7 @@ class UserInterface:
 
     def enter_input(self):
         user_input = input(
-            f"\nEnter a string in {source_language} ('restart' to change decks, 'exit' to quit):\n\n"
+            f"Enter a string in {source_language} ('restart' to change decks, 'exit' to quit):\n\n"
         )
         return user_input
 

@@ -1,6 +1,6 @@
 import json
 import urllib.request
-from models.note import Note, InflectedNote
+from models.note import Note
 
 
 class AnkiInterface:
@@ -47,27 +47,35 @@ class AnkiInterface:
                     pos = fields.get("pos").get("value")
                     source = fields.get("source").get("value")
                     target = fields.get("target").get("value")
+                    gender = fields.get("gender").get("value")
+                    number = fields.get("number").get("value")
 
-                    note = None
-
-                    if "gender" in fields:
-                        gender = fields.get("gender").get("value")
-                        number = fields.get("number").get("value")
-                        note = InflectedNote(pos, source, target, gender, number, id)
-                    else:
-                        note = Note(pos, source, target, id)
+                    note = Note(pos, source, target, id, gender, number)
 
                     token.add_note(note)
 
-    def find_notes(self, text):
-        query = f'deck:"{self.read_deck}" source:"{text}"'
-        response = self.call_api("findNotes", query=query)
-        if response:
-            notes_info = self.call_api("notesInfo", notes=response)
-            for note_info in notes_info:
-                id = note_info.get("noteId")
-                fields = note_info.get("fields")
-                source = fields.get("source").get("value")
-                target = fields.get("target").get("value")
-                existing_note = Note(id, source, target)
-                print(existing_note)
+    def add_notes(self, text):
+        for token in text.tokens:
+            for note in token.notes:
+                if note.will_add:
+                    anki_note = {
+                        "deckName": self.write_deck,
+                        "modelName": "french-term",
+                        "fields": {
+                            "source": note.source,
+                            "target": note.target,
+                            "pos": note.pos,
+                            "gender": note.gender if note.gender else "NONE",
+                            "number": note.number if note.number else "NONE",
+                        },
+                        "options": {
+                            "allowDuplicate": False,
+                            "duplicateScope": self.read_deck,
+                        },
+                    }
+
+                    try:
+                        self.call_api("addNote", note=anki_note)
+                    except:
+                        print(f"Skipped creating note for {note.source} (duplicate)")
+                        continue

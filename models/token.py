@@ -1,6 +1,3 @@
-from global_vars import column_widths
-
-
 class Token:
     def __init__(self, text, lemma, pos, start, end):
         self.text = text
@@ -16,10 +13,17 @@ class Token:
             self.notes.append(new_note)
 
     def __str__(self):
+        targets = []
+
+        for note in self.notes:
+            if note.source == self.text:
+                targets.append(note.target)
+            else:
+                targets.append(f"{note.target} ({note.source})")
+
         return (
-            f"{self.text:<{column_widths[0]}}"
-            f"{self.lemma:<{column_widths[1]}}"
-            f"{self.pos:<{column_widths[2]}}"
-            f"{'marked' if self.will_look_up else '':<{column_widths[3]}}"
-            f"[{', '.join(str(note) for note in self.notes)}]"
+            f"{self.text:<15}"
+            f"{self.lemma:<15}"
+            f"{self.pos:<10}"
+            f"{', '.join(targets)}"
         )
