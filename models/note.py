@@ -10,5 +10,9 @@ class Note:
 
     def __str__(self):
         return (
-            f"{self.source} ({self.pos}, {self.gender}, {self.number}): {self.target}"
+            f"{self.source:<15}"
+            + f"{self.target:<15}"
+            + f"{self.pos:<10}"
+            + f"{self.gender if self.gender else 'None':<10}"
+            + f"{self.number if self.number else 'None':<10}"
         )
