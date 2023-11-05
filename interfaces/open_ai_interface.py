@@ -3,7 +3,7 @@ import os
 
 import openai
 from dotenv import load_dotenv
-from global_vars import source_language, target_language
+from global_variables import source_language, target_language
 from models.note import Note
 
 

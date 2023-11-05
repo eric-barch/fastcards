@@ -1,29 +1,29 @@
 import inquirer
 
-from global_vars import source_language
+from global_variables import source_language
 
 
 class UserInterface:
     def __init__(self):
         pass
 
-    def select_decks(self, available_decks):
-        read_deck_name = self.select_deck("Select read deck", available_decks)
-        write_deck_name = self.select_deck("Select write deck", available_decks)
+    def select_decks(self, available_deck_names):
+        read_deck_name = self.select_deck("Select read deck", available_deck_names)
+        write_deck_name = self.select_deck("Select write deck", available_deck_names)
         return read_deck_name, write_deck_name
 
-    def select_deck(self, prompt, available_decks):
+    def select_deck(self, prompt, available_deck_names):
         print()
 
         questions = [
             inquirer.List(
-                name="deck",
+                name="deck_name",
                 message=prompt,
-                choices=available_decks,
+                choices=available_deck_names,
             ),
         ]
 
-        return inquirer.prompt(questions).get("deck")
+        return inquirer.prompt(questions).get("deck_name")
 
     def enter_input(self):
         return input(
@@ -34,40 +34,43 @@ class UserInterface:
         print()
 
         tokens = text.tokens
+        choices = [(str(token), i) for i, token in enumerate(tokens)]
+        default_choices = [
+            (str(token), i)
+            for i, token in enumerate(tokens)
+            if not token.get_notes() and token.pos != "PROPN"
+        ]
 
         questions = [
             inquirer.Checkbox(
-                name="tokens",
+                name="token_indices",
                 message="Select tokens to look up",
-                choices=[(str(token), i) for i, token in enumerate(tokens)],
-                default=[
-                    (i)
-                    for i, token in enumerate(tokens)
-                    if not token.get_notes() and token.pos != "PROPN"
-                ],
+                choices=choices,
+                default=default_choices,
             ),
         ]
 
-        indices = inquirer.prompt(questions).get("tokens")
+        token_indices = inquirer.prompt(questions).get("token_indices")
 
-        for index in indices:
+        for index in token_indices:
             tokens[index].will_look_up = True
 
     def select_notes(self, text):
         print()
 
         new_notes = text.get_new_notes()
+        choices = [(str(note), i) for i, note in enumerate(new_notes)]
 
         questions = [
             inquirer.Checkbox(
-                name="notes",
-                message="Confirm notes to create",
-                choices=[(str(note), i) for i, note in enumerate(new_notes)],
-                default=[(i) for i, note in enumerate(new_notes)],
+                name="new_note_indices",
+                message="Select notes to create",
+                choices=choices,
+                default=choices,
             )
         ]
 
-        indices = inquirer.prompt(questions).get("notes")
+        new_note_indices = inquirer.prompt(questions).get("new_notes_indices")
 
-        for index in indices:
+        for index in new_note_indices:
             new_notes[index].will_add = True
