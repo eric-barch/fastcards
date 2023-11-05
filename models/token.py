@@ -11,7 +11,7 @@ class Token:
         self.will_look_up = False
 
     def get_inflection_strings(self):
-        return [str(self.text), str(self.lemma)]
+        return [str(self.text).strip().lower(), str(self.lemma).strip().lower()]
 
     def add_note(self, note):
         for inflection in [self.text, self.lemma]:
