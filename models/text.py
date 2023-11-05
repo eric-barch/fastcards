@@ -64,7 +64,7 @@ class Text:
         new_notes = []
 
         for token in self.tokens:
-            for note in token.notes:
+            for note in token.get_notes():
                 if not note.id:
                     new_notes.append(note)
 
