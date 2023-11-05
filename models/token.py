@@ -33,7 +33,7 @@ class Token:
         targets = []
 
         for note in self.get_notes():
-            if note.source == self.text:
+            if note.source == self.text.inflection:
                 targets.append(note.target)
             else:
                 targets.append(f"{note.target} ({note.source})")
