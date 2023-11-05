@@ -160,7 +160,7 @@ class OpenAiInterface:
 
             if response_match is None:
                 print(
-                    f"\n\033[31mWARN:\033[0m skipping {marked_token.text.inflection} (did not find matching response item)"
+                    f"\033[31mWARN:\033[0m skipping {marked_token.text.inflection} (did not find matching response item)"
                 )
                 continue
 

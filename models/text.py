@@ -7,7 +7,6 @@ nlp = spacy.load("fr_dep_news_trf")
 
 class Text:
     def __init__(self, input):
-        super().__init__()
         self.string = input
         self.tokens = self.tokenize(input)
 
@@ -33,23 +32,23 @@ class Text:
         return tokens
 
     def get_marked_string(self):
-        marked_text = self.string
+        marked_string = self.string
         offset = 0
 
         for token in self.tokens:
             if token.will_look_up:
                 start = token.start + offset
                 end = token.end + offset
-                marked_text = (
-                    marked_text[:start]
+                marked_string = (
+                    marked_string[:start]
                     + "["
-                    + marked_text[start:end]
+                    + marked_string[start:end]
                     + "]"
-                    + marked_text[end:]
+                    + marked_string[end:]
                 )
-                offset += 2  # account for the added brackets
+                offset += 2
 
-        return marked_text
+        return marked_string
 
     def get_marked_tokens(self):
         marked_tokens = []
@@ -69,6 +68,3 @@ class Text:
                     new_notes.append(note)
 
         return new_notes
-
-    def __str__(self):
-        return "\n".join(str(token) for token in self.tokens)
