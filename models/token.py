@@ -21,25 +21,25 @@ class Token:
             except NoteInflectionMismatchException:
                 continue
 
-        # if the above fails, spaCy incorrectly detected token's lemma
+        # if the above fails, spaCy incorrectly detected token's lemma. replace it and add note.
         self.lemma = Inflection(note.source)
         self.lemma.add_note(note)
 
     def get_notes(self):
         notes = []
+
         for inflection in [self.text, self.lemma]:
             notes.extend(inflection.notes)
+
         return notes
 
     def __str__(self):
         targets = []
 
         if self.text.notes:
-            for note in self.text.notes:
-                targets.append(note.target)
+            targets = [note.target for note in self.text.notes]
         elif self.lemma.notes:
-            for note in self.lemma.notes:
-                targets.append(f"{note.target} ({note.source})")
+            targets = [f"{note.target} ({note.source})" for note in self.lemma.notes]
 
         return (
             f"{self.text:<15}"
