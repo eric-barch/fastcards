@@ -12,9 +12,9 @@ def main():
     exit = False
 
     while not exit:
-        all_decks = anki_interface.get_all_deck_names()
-        read_deck, write_deck = user_interface.select_decks(all_decks)
-        anki_interface.set_deck_names(read_deck, write_deck)
+        all_deck_names = anki_interface.get_all_deck_names()
+        read_deck_name, write_deck_name = user_interface.select_decks(all_deck_names)
+        anki_interface.set_deck_names(read_deck_name, write_deck_name)
 
         restart = False
 
