@@ -27,7 +27,7 @@ class OpenAiInterface:
 
     def look_up_tokens(self, text):
         system_prompt = f"""
-            For a given string in {source_language}, return an array of JSON objects, one for each 
+            For a given string in {source_language.capitalize()}, return an array of JSON objects, one for each 
             bracketed token. Include fields: "token", "pos", "source", "target", "gender", and 
             "number". If the token is a VERB, "source" and "target" should be in their infinitive 
             form. Ensure the response array matches the number of bracketed tokens in the request.
@@ -38,7 +38,7 @@ class OpenAiInterface:
             Response: {{
                 "token": token text, always EXACTLY how it appears in the string,
                 "pos": token part of speech abbreviation,
-                "source": the {source_language} word,
+                "source": the {source_language.capitalize()} word,
                 "target": English translation of source,
                 "gender": "MASC", "FEM", or null, as applicable,
                 "number": "SING", "PLUR", or null, as applicable
@@ -89,10 +89,10 @@ class OpenAiInterface:
 
             Request: "[regardant]"
             Response: {{
-                "token": "regardant",
+                "token": "regardant", // exactly as appears in string
                 "pos": "VERB",
-                "source": "regarder",
-                "target": "to look",
+                "source": "regarder", // infinitive
+                "target": "to look", // infinitive
                 "gender": null,
                 "number": null
             }}
@@ -101,9 +101,9 @@ class OpenAiInterface:
 
             Request: "[C']"
             Response: {{
-                "token": "C'",
+                "token": "C'", // exactly as appears in string
                 "pos": "PRON",
-                "source": "ce", // inferred from string context
+                "source": "ce", // unabbreviated form inferred from string context
                 "target": "it",
                 "gender": "MASC",
                 "number": "SING"
@@ -111,9 +111,9 @@ class OpenAiInterface:
 
             Part of Hyphenated Token:
 
-            Request: "[Ferme]-la" // '-la' is ignored because it is not inside brackets
+            Request: "[Ferme]-la"
             Response: {{
-                "token": "Ferme",
+                "token": "Ferme", // '-la' ignored because it is not inside brackets
                 "pos": "VERB",
                 "source": "fermer",
                 "target": "to close",
@@ -127,6 +127,9 @@ class OpenAiInterface:
         request = text.get_marked_string()
         response = json.loads(self.call_api(system_prompt, request))
 
+        if not isinstance(response, list):
+            response = [response]
+
         # for debugging
         print(f"OpenAI response: {json.dumps(response, indent=4)}")
 
@@ -137,7 +140,17 @@ class OpenAiInterface:
                 f"\n\033[31mWARN:\033[0m received different number of responses than requests sent"
             )
 
-        for i, item in enumerate(response):
+        for marked_token in marked_tokens:
+            response_match = None
+
+            for item in response:
+                if item.get("token") == marked_token.text.inflection:
+                    response_match = item
+                    break
+
+            if response_match is None:
+                raise Exception("No matching item found in response")
+
             pos = item.get("pos")
             source = item.get("source")
             target = item.get("target")
@@ -146,4 +159,4 @@ class OpenAiInterface:
 
             note = Note(pos, source, target, None, gender, number)
 
-            marked_tokens[i].add_note(note)
+            marked_token.add_note(note)

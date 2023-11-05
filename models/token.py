@@ -19,9 +19,11 @@ class Token:
                 inflection.add_note(note)
                 return
             except NoteInflectionMismatchException:
-                pass
+                continue
 
-        raise NoteTokenMismatchException(note, self)
+        # if the above fails, spaCy incorrectly detected token's lemma
+        self.lemma = Inflection(note.source)
+        self.lemma.add_note(note)
 
     def get_notes(self):
         notes = []
