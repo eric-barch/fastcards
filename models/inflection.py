@@ -4,7 +4,7 @@ class Inflection:
         self.notes = []
 
     def add_note(self, note):
-        if note.source != self.inflection.strip().lower():
+        if note.source.strip().lower() != self.inflection.strip().lower():
             raise NoteInflectionMismatchException(note, self)
         self.notes.append(note)
 
