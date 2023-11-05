@@ -36,7 +36,7 @@ class UserInterface:
         tokens = text.tokens
         choices = [(str(token), i) for i, token in enumerate(tokens)]
         default_choices = [
-            (str(token), i)
+            i
             for i, token in enumerate(tokens)
             if not token.get_notes() and token.pos != "PROPN"
         ]
@@ -60,17 +60,18 @@ class UserInterface:
 
         new_notes = text.get_new_notes()
         choices = [(str(note), i) for i, note in enumerate(new_notes)]
+        default_choices = [i for _, i in choices]
 
         questions = [
             inquirer.Checkbox(
                 name="new_note_indices",
                 message="Select notes to create",
                 choices=choices,
-                default=choices,
+                default=default_choices,
             )
         ]
 
-        new_note_indices = inquirer.prompt(questions).get("new_notes_indices")
+        new_note_indices = inquirer.prompt(questions).get("new_note_indices")
 
         for index in new_note_indices:
             new_notes[index].will_add = True
