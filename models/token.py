@@ -34,10 +34,11 @@ class Token:
     def __str__(self):
         targets = []
 
-        for note in self.get_notes():
-            if note.source == self.text.inflection:
+        if self.text.notes:
+            for note in self.text.notes:
                 targets.append(note.target)
-            else:
+        elif self.lemma.notes:
+            for note in self.lemma.notes:
                 targets.append(f"{note.target} ({note.source})")
 
         return (

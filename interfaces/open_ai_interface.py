@@ -38,8 +38,8 @@ class OpenAiInterface:
             Response: {{
                 "token": token text, always EXACTLY how it appears in the string,
                 "pos": token part of speech abbreviation,
-                "source": the {source_language.capitalize()} word,
-                "target": English translation of source,
+                "source": the {source_language.capitalize()} word, lowercase unless PROPN
+                "target": English translation of source, lowercase unless PROPN
                 "gender": "MASC", "FEM", or null, as applicable,
                 "number": "SING", "PLUR", or null, as applicable
             }}
@@ -109,14 +109,24 @@ class OpenAiInterface:
                 "number": "SING"
             }}
 
-            Part of Hyphenated Token:
+            Part of Contraction Tokens:
 
             Request: "[Ferme]-la"
             Response: {{
-                "token": "Ferme", // '-la' ignored because it is not inside brackets
+                "token": "Ferme", // "-la" ignored because not inside brackets
                 "pos": "VERB",
                 "source": "fermer",
                 "target": "to close",
+                "gender": null,
+                "number": null
+            }}
+
+            Request: "s'[éloigna]"
+            Response: {{
+                "token": "éloigna", // "s'" ignored because not inside brackets
+                "pos": "VERB",
+                "source": "éloigner",
+                "target": "to move away",
                 "gender": null,
                 "number": null
             }}
@@ -149,7 +159,10 @@ class OpenAiInterface:
                     break
 
             if response_match is None:
-                raise Exception("No matching item found in response")
+                print(
+                    f"\n\033[31mWARN:\033[0m skipping {marked_token.text.inflection} (did not find matching response item)"
+                )
+                continue
 
             pos = item.get("pos")
             source = item.get("source")

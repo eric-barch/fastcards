@@ -32,7 +32,11 @@ def main():
             text = Text(input)
 
             anki_interface.find_existing_notes(text)
-            user_interface.select_tokens(text)
+            token_indices = user_interface.select_tokens(text)
+
+            if not token_indices:
+                continue
+
             open_ai_interface.look_up_tokens(text)
             user_interface.select_notes(text)
             anki_interface.add_notes(text)

@@ -55,6 +55,8 @@ class UserInterface:
         for index in token_indices:
             tokens[index].will_look_up = True
 
+        return token_indices
+
     def select_notes(self, text):
         print()
 
