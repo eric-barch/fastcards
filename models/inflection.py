@@ -9,7 +9,7 @@ class Inflection:
         self.notes.append(note)
 
     def __str__(self):
-        return self.inflection.strip().lower()
+        return self.inflection
 
     def __format__(self, format_spec):
         return format(str(self), format_spec)
