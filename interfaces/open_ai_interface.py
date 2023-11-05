@@ -154,13 +154,13 @@ class OpenAiInterface:
             response_match = None
 
             for item in response:
-                if item.get("token") == marked_token.text.inflection:
+                if item.get("token") == marked_token.text.string:
                     response_match = item
                     break
 
             if response_match is None:
                 print(
-                    f"\033[31mWARN:\033[0m skipping {marked_token.text.inflection} (did not find matching response item)"
+                    f"\033[31mWARN:\033[0m skipping {marked_token.text.string} (did not find matching response item)"
                 )
                 continue
 
