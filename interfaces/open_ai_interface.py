@@ -27,43 +27,56 @@ class OpenAiInterface:
 
     def look_up_tokens(self, text):
         system_prompt = f"""
-            You will receive a string in {source_language}. Return an array of JSON objects for 
-            each of the bracketed tokens. Each JSON object should include fields "token", "pos",
-            "source", "target", "gender", and "number".
+            For a given string in {source_language}, return an array of JSON objects, one for each 
+            bracketed token. Include fields: "token", "pos", "source", "target", "gender", and 
+            "number". If the token is a VERB, "source" and "target" should be in their infinitive 
+            form. Ensure the response array matches the number of bracketed tokens in the request.
+            Use the following examples as guidance to craft your response.
 
-            Example full request and desired response:
+            Generic example:
 
-            request: "Je dois prendre le train à la gare de King's Cross à [onze] [heures]."
-            response: [
-                {{
-                    "token": "onze",
-                    "pos": "NUM",
-                    "source": "onze",
-                    "target": "eleven",
-                    "gender": null,
-                    "number": null
-                }},
-                {{
-                    "token": "heures",
-                    "pos": "NOUN",
-                    "source": "heures",
-                    "target": "hours",
-                    "gender": "FEM",
-                    "number": "PLUR"
-                }}
-            ]
+            Response: {{
+                "token": token text, always EXACTLY how it appears in the string,
+                "pos": token part of speech abbreviation,
+                "source": the {source_language} word,
+                "target": English translation of source,
+                "gender": "MASC", "FEM", or null, as applicable,
+                "number": "SING", "PLUR", or null, as applicable
+            }}
 
-            Example request ITEMS and their desired response ITEM. These are the components that 
-            will make up your full response array, provided as additional training material. 
+            Choose from the following parts of speech: ADJ, ADP, ADV, AUX, CONJ, CCONJ, DET, INTJ, 
+            NOUN, NUM, PART, PRON, PROPN, PUNCT, SCONJ, SYM, VERB, X
             
-            If the token is a VERB, "source" and "target" should both be in their infinitive form, 
-            e.g. "réveiller" and "to wake up". 
+            Other examples:
 
-            ENSURE THAT YOUR RESPONSE ARRAY ALWAYS CONTAINS EXACTLY THE SAME NUMBER OF ITEMS AS
-            THERE ARE BRACKETED TOKENS IN THE REQUEST STRING.
+            Numerical Value:
 
-            request item: "pleine"
-            response item: {{
+            Request: "[onze]"
+            Response: {{
+                "token": "onze",
+                "pos": "NUM",
+                "source": "onze",
+                "target": "eleven",
+                "gender": null,
+                "number": null
+            }}
+
+            Noun:
+
+            Request: "[heures]"
+            Response: {{
+                "token": "heures",
+                "pos": "NOUN",
+                "source": "heures",
+                "target": "hours",
+                "gender": "FEM",
+                "number": "PLUR"
+            }}
+
+            Adjective:
+
+            Request: "[pleine]"
+            Response: {{
                 "token": "pleine",
                 "pos": "ADJ",
                 "source": "pleine",
@@ -71,9 +84,11 @@ class OpenAiInterface:
                 "gender": "FEM",
                 "number": "SING"
             }}
+            
+            Verb in non-infinitive form:
 
-            request item: "regardant"
-            response item: {{
+            Request: "[regardant]"
+            Response: {{
                 "token": "regardant",
                 "pos": "VERB",
                 "source": "regarder",
@@ -82,84 +97,28 @@ class OpenAiInterface:
                 "number": null
             }}
 
-            request item: "ronds"
-            response item: {{
-                "token": "ronds",
-                "pos": "NOUN",
-                "source": "ronds",
-                "target": "round",
-                "gender": "MASC",
-                "number": "PLUR"
-            }}
+            Short Form/Abbreviated Token:
 
-            request item: "C'"
-            response item: {{ // note: inferred from string context
+            Request: "[C']"
+            Response: {{
                 "token": "C'",
                 "pos": "PRON",
-                "source": "ce",
+                "source": "ce", // inferred from string context
                 "target": "it",
                 "gender": "MASC",
                 "number": "SING"
             }}
 
-            request item: "est"
-            response item: {{
-                "token": "est",
+            Part of Hyphenated Token:
+
+            Request: "[Ferme]-la" // '-la' is ignored because it is not inside brackets
+            Response: {{
+                "token": "Ferme",
                 "pos": "VERB",
-                "source": "\u00eatre",
-                "target": "to be",
+                "source": "fermer",
+                "target": "to close",
                 "gender": null,
                 "number": null
-            }}
-
-            request item: "Tous"
-            response item: {{
-                "token": "Tous",
-                "pos": "ADJ",
-                "source": "tous",
-                "target": "all",
-                "gender": "MASC",
-                "number": "PLUR"
-            }}
-
-            request item: "essayant"
-            response item: {{
-                "token": "essayant",
-                "pos": "VERB",
-                "source": "essayer",
-                "target": "to try",
-                "gender": null,
-                "number": null
-            }}
-
-            request item: "au"
-            response item: {{
-                "token": "au",
-                "pos": "PREP",
-                "source": "au",
-                "target": "to the",
-                "gender": "MASC",
-                "number": "SING"
-            }}
-
-            request item: "Inutile"
-            response item: {{
-                "token": "Inutile",
-                "pos": "ADJ",
-                "source": "inutile",
-                "target": "useless",
-                "gender": null,
-                "number": "SING"
-            }},
-
-            request item: "scolaires"
-            response item: {{
-                "token": "scolaires",
-                "pos": "ADJ",
-                "source": "scolaires",
-                "target": "scholastic",
-                "gender": null,
-                "number": "PLUR"
             }}
         """
 
@@ -169,7 +128,7 @@ class OpenAiInterface:
         response = json.loads(self.call_api(system_prompt, request))
 
         # for debugging
-        # print(f"OpenAI response: {json.dumps(response, indent=4)}")
+        print(f"OpenAI response: {json.dumps(response, indent=4)}")
 
         marked_tokens = text.get_marked_tokens()
 
