@@ -88,6 +88,10 @@ class AnkiInterface:
 
                     try:
                         self.call_api("addNote", note=anki_note)
-                    except:
-                        print(f"Skipped creating note for {note.source} (duplicate)")
-                        continue
+                    except Exception as e:
+                        if "duplicate" in str(e):
+                            print(
+                                f"Skipped creating note for {note.source} (duplicate)"
+                            )
+                        else:
+                            raise
