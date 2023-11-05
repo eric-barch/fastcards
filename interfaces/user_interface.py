@@ -26,10 +26,9 @@ class UserInterface:
         return inquirer.prompt(questions).get("deck")
 
     def enter_input(self):
-        user_input = input(
+        return input(
             f"Enter a string in {source_language} ('restart' to change decks, 'exit' to quit):\n\n"
         )
-        return user_input
 
     def select_tokens(self, text):
         print()
