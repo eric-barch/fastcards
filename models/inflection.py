@@ -4,12 +4,12 @@ class Inflection:
         self.notes = []
 
     def add_note(self, note):
-        if note.source != self.inflection:
+        if note.source != self.inflection.strip().lower():
             raise NoteInflectionMismatchException(note, self)
         self.notes.append(note)
 
     def __str__(self):
-        return self.inflection
+        return self.inflection.strip().lower()
 
     def __format__(self, format_spec):
         return format(str(self), format_spec)
