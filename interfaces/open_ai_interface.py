@@ -14,7 +14,7 @@ class OpenAiInterface:
 
     def call_api(self, systemPrompt: str, string: str):
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": systemPrompt},
                 {
@@ -69,8 +69,8 @@ class OpenAiInterface:
                 "pos": "NOUN",
                 "source": "heures",
                 "target": "hours",
-                "gender": "FEM",
-                "number": "PLUR"
+                "gender": "FEM", // NOUNs almost always have gender
+                "number": "PLUR" // NOUNs almost always have number
             }}
 
             Adjective:
@@ -81,8 +81,8 @@ class OpenAiInterface:
                 "pos": "ADJ",
                 "source": "pleine",
                 "target": "full",
-                "gender": "FEM",
-                "number": "SING"
+                "gender": "FEM", // ADJs almost always have gender
+                "number": "SING" // ADJs almost always have number
             }}
             
             Verb in non-infinitive form:
