@@ -25,6 +25,8 @@ class Token:
         self.lemma = Inflection(note.source)
         self.lemma.add_note(note)
 
+        self.will_look_up = False
+
     def get_notes(self):
         notes = []
 
