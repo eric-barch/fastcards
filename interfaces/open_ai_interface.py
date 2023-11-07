@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from global_variables import source_language
 from models.note import Note
 
+GPT_MODEL = "gpt-3.5-turbo-1106"
+
 
 class OpenAiInterface:
     def __init__(self):
@@ -14,7 +16,7 @@ class OpenAiInterface:
 
     def call_api(self, systemPrompt: str, string: str):
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=GPT_MODEL,
             messages=[
                 {"role": "system", "content": systemPrompt},
                 {
@@ -23,30 +25,40 @@ class OpenAiInterface:
                 },
             ],
         )
-        return response.choices[0].message.content
+
+        if response.choices[0].finish_reason != "length":
+            return response.choices[0].message.content
+
+        raise Exception("Response terminated due to length.")
 
     def look_up_tokens(self, text):
         system_prompt = f"""
-            For a given string in {source_language.capitalize()}, return an array of JSON objects, one for each 
-            bracketed token. Include fields: "token", "pos", "source", "target", "gender", and 
-            "number". If the token is a VERB, "source" and "target" should be in their infinitive 
-            form. Ensure the response array matches the number of bracketed tokens in the request.
+            For a given string in {source_language.capitalize()}, return an array of JSON objects, 
+            one for each bracketed token. Include fields: "token", "pos", "source", "target", 
+            "gender", and "number". 
+            
+            For "pos", choose from the following: ADJ, ADP, ADV, AUX, CONJ, CCONJ, DET, INTJ, NOUN, 
+            NUM, PART, PRON, PROPN, PUNCT, SCONJ, SYM, VERB, X
+            
+            If the token is a VERB, "source" and "target" should be in their infinitive form. 
+            
+            IMPORTANT: Your response must always be an ARRAY, even if their is only one JSON object
+            in it. Your response array MUST have the same number of items as there are bracketed 
+            tokens in the request. 
+            
             Use the following examples as guidance to craft your response.
-
+           
             Generic example:
 
             Response: {{
-                "token": token text, always EXACTLY how it appears in the string,
-                "pos": token part of speech abbreviation,
-                "source": the {source_language.capitalize()} word, lowercase unless PROPN
-                "target": English translation of source, lowercase unless PROPN
-                "gender": "MASC", "FEM", or null, as applicable,
-                "number": "SING", "PLUR", or null, as applicable
+                "token": token text, always EXACTLY how it appears inside brackets in the string,
+                "pos": part of speech abbreviation,
+                "source": the {source_language.capitalize()} word, always lowercase unless PROPN
+                "target": English translation of source, always lowercase unless PROPN
+                "gender": "MASC", "FEM", or null,
+                "number": "SING", "PLUR", or null,
             }}
-
-            Choose from the following parts of speech: ADJ, ADP, ADV, AUX, CONJ, CCONJ, DET, INTJ, 
-            NOUN, NUM, PART, PRON, PROPN, PUNCT, SCONJ, SYM, VERB, X
-            
+           
             Other examples:
 
             Numerical Value:
@@ -89,7 +101,7 @@ class OpenAiInterface:
 
             Request: "[regardant]"
             Response: {{
-                "token": "regardant", // exactly as appears in string
+                "token": "regardant", // exactly as appears inside brackets
                 "pos": "VERB",
                 "source": "regarder", // infinitive
                 "target": "to look", // infinitive
@@ -132,16 +144,16 @@ class OpenAiInterface:
             }}
         """
 
-        print(f"OpenAI request: {text.get_marked_string()}")
-
         request = text.get_marked_string()
+
+        print(f"OpenAI request: {request}")
+
         response = json.loads(self.call_api(system_prompt, request))
+
+        print(f"OpenAI response: {json.dumps(response, indent=4)}")
 
         if not isinstance(response, list):
             response = [response]
-
-        # for debugging
-        print(f"OpenAI response: {json.dumps(response, indent=4)}")
 
         marked_tokens = text.get_marked_tokens()
 
@@ -158,9 +170,12 @@ class OpenAiInterface:
                     response_match = item
                     break
 
+            # TODO: Ask again for items that were missed. Can pretty much just do it by running the
+            # above again.
             if response_match is None:
                 print(
-                    f"\033[31mWARN:\033[0m skipping {marked_token.text.string} (did not find matching response item)"
+                    f"\033[31mWARN:\033[0m skipping {marked_token.text.string} "
+                    f"(did not find matching response item)"
                 )
                 continue
 
