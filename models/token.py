@@ -17,6 +17,7 @@ class Token:
         for inflection in [self.text, self.lemma]:
             try:
                 inflection.add_note(note)
+                self.will_look_up = False
                 return
             except NoteInflectionMismatchException:
                 continue
@@ -24,7 +25,6 @@ class Token:
         # if the above fails, spaCy incorrectly detected token's lemma. replace it and add note.
         self.lemma = Inflection(note.source)
         self.lemma.add_note(note)
-
         self.will_look_up = False
 
     def get_notes(self):
