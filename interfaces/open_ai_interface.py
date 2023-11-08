@@ -3,10 +3,11 @@ import os
 
 import openai
 from dotenv import load_dotenv
-from global_variables import source_language
+from global_variables import source_language, target_language
 from models.note import Note
 
 GPT_MODEL = "gpt-3.5-turbo-1106"
+# gpt-3.5-turbo-1106 or gpt-4-1106-preview
 
 
 class OpenAiInterface:
@@ -33,38 +34,40 @@ class OpenAiInterface:
 
     def look_up_tokens(self, text):
         system_prompt = f"""
-            For a given string in {source_language.capitalize()}, return an array of JSON objects, 
-            one for each bracketed token. Include fields: "token", "pos", "source", "target", 
-            "gender", and "number". 
-            
-            For "pos", choose from the following: ADJ, ADP, ADV, AUX, CONJ, CCONJ, DET, INTJ, NOUN, 
-            NUM, PART, PRON, PROPN, PUNCT, SCONJ, SYM, VERB, X
-            
-            If the token is a VERB, "source" and "target" should be in their infinitive form. 
-            
-            IMPORTANT: Your response must always be an ARRAY, even if their is only one JSON object
-            in it. Your response array MUST have the same number of items as there are bracketed 
-            tokens in the request. 
-            
-            Use the following examples as guidance to craft your response.
-           
-            Generic example:
+            The task is to parse a given string in {source_language.capitalize()} and return an 
+            array of JSON objects. Each JSON object corresponds to a bracketed token in the input 
+            string. Ensure these rules are followed:
 
-            Response: {{
-                "token": token text, always EXACTLY how it appears inside brackets in the string,
-                "pos": part of speech abbreviation,
-                "source": the {source_language.capitalize()} word, always lowercase unless PROPN
-                "target": English translation of source, always lowercase unless PROPN
-                "gender": "MASC", "FEM", or null,
-                "number": "SING", "PLUR", or null,
+            - The response must be an array containing JSON objects, even if there's only one 
+              bracketed token.
+            - The array length should match the number of bracketed tokens in the input string.
+            - Return only the raw array without markdown formatting or other text decoration.
+
+            Structure each JSON object in the array as follows:
+
+            {{
+                "token": "<The exact bracketed token or token fragment from the input>",
+                "pos": "<Part of Speech tags like 'NOUN', 'VERB', etc.>",
+                "source": "<the source word, usually the same as 'token'. verbs in the infinitive, 
+                          otherwise do not change inflection from input>",
+                "target": "<{target_language.capitalize()} translation, with verbs in the 
+                          infinitive>",
+                "gender": "<'MASC', 'FEM', or null when inapplicable. almost never null for nouns 
+                          and adjectives>",
+                "number": "<'SING', 'PLUR', or null when inapplicable. almost never null for nouns 
+                          and adjectives>"
             }}
-           
-            Other examples:
+
+            - 'gender' and 'number' must not be null if the token's gender/number is discernible 
+              independently.
+            - For verbs, always use the infinitive form in 'source' and 'target' fields.
+            - Exclude parts of a token not enclosed in brackets.
+
+            Example input and output scenarios:
 
             Numerical Value:
-
-            Request: "[onze]"
-            Response: {{
+            Input: "[onze]"
+            Output: {{
                 "token": "onze",
                 "pos": "NUM",
                 "source": "onze",
@@ -74,86 +77,65 @@ class OpenAiInterface:
             }}
 
             Noun:
-
-            Request: "[heures]"
-            Response: {{
+            Input: "[heures]"
+            Output: {{
                 "token": "heures",
                 "pos": "NOUN",
                 "source": "heures",
                 "target": "hours",
-                "gender": "FEM", // NOUNs almost always have gender
-                "number": "PLUR" // NOUNs almost always have number
+                "gender": "FEM",
+                "number": "PLUR"
             }}
 
-            Adjective:
-
-            Request: "[pleine]"
-            Response: {{
-                "token": "pleine",
-                "pos": "ADJ",
-                "source": "pleine",
-                "target": "full",
-                "gender": "FEM", // ADJs almost always have gender
-                "number": "SING" // ADJs almost always have number
-            }}
-            
-            Verb in non-infinitive form:
-
-            Request: "[regardant]"
-            Response: {{
-                "token": "regardant", // exactly as appears inside brackets
+            Verb (non-infinitive form):
+            Input: "[regarda]"
+            Output: {{
+                "token": "regarda",
                 "pos": "VERB",
-                "source": "regarder", // infinitive
-                "target": "to look", // infinitive
+                "source": "regarder",
+                "target": "to look",
                 "gender": null,
                 "number": null
             }}
 
-            Short Form/Abbreviated Token:
-
-            Request: "[C']"
-            Response: {{
-                "token": "C'", // exactly as appears in string
-                "pos": "PRON",
-                "source": "ce", // unabbreviated form inferred from string context
-                "target": "it",
+            Determiner:
+            Input: "[mon]"
+            Output: {{
+                "token": "mon",
+                "pos": "DET",
+                "source": "mon",
+                "target": "my",
                 "gender": "MASC",
                 "number": "SING"
             }}
 
-            Part of Contraction Tokens:
-
-            Request: "[Ferme]-la"
-            Response: {{
-                "token": "Ferme", // "-la" ignored because not inside brackets
+            Contraction Fragment:
+            Input: "[Ferme]-la"
+            Output: {{
+                "token": "Ferme",
                 "pos": "VERB",
-                "source": "fermer",
-                "target": "to close",
-                "gender": null,
-                "number": null
-            }}
-
-            Request: "s'[éloigna]"
-            Response: {{
-                "token": "éloigna", // "s'" ignored because not inside brackets
-                "pos": "VERB",
-                "source": "éloigner",
-                "target": "to move away",
+                "source": "fermer", // infinitive because VERB
+                "target": "to close", // infinitive because VERB
                 "gender": null,
                 "number": null
             }}
         """
 
         request = text.get_marked_string()
-
         print(f"OpenAI request: {request}")
 
-        response = json.loads(self.call_api(system_prompt, request))
+        raw_response = self.call_api(system_prompt, request).strip()
+        # for debugging
+        print(f"raw_response: {raw_response}")
 
-        print(f"OpenAI response: {json.dumps(response, indent=4)}")
+        if raw_response.startswith("```json"):
+            raw_response = raw_response[7:]
+        if raw_response.endswith("```"):
+            raw_response = raw_response[:-3]
 
-        if not isinstance(response, list):
-            response = [response]
+        response = json.loads(raw_response)
+        # for debugging
+        # print(f"OpenAI response: {json.dumps(response, indent=4)}")
 
         marked_tokens = text.get_marked_tokens()
 
