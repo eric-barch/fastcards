@@ -21,19 +21,19 @@ def main():
         while not restart:
             input = user_interface.enter_input()
 
-            if input.lower().strip() == "restart":
+            if input.strip().lower() == "restart":
                 restart = True
                 break
 
-            if input.lower().strip() == "exit":
+            if input.strip().lower() == "exit":
                 exit = True
                 break
 
             text = Text(input)
 
             anki_interface.find_existing_notes(text)
-            token_indices = user_interface.select_tokens(text)
 
+            token_indices = user_interface.select_tokens(text)
             if not token_indices:
                 continue
 

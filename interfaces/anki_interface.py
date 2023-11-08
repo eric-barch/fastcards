@@ -47,14 +47,12 @@ class AnkiInterface:
             existing_note_ids = self.call_api("findNotes", query=query)
 
             if existing_note_ids:
-                existing_note_infos = self.call_api(
-                    "notesInfo", notes=existing_note_ids
-                )
+                existing_note_data = self.call_api("notesInfo", notes=existing_note_ids)
 
-                for existing_note_info in existing_note_infos:
-                    id = existing_note_info.get("noteId")
+                for existing_note_datum in existing_note_data:
+                    id = existing_note_datum.get("noteId")
 
-                    fields = existing_note_info.get("fields")
+                    fields = existing_note_datum.get("fields")
 
                     pos = fields.get("pos").get("value")
                     source = fields.get("source").get("value")
