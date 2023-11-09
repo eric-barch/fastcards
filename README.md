@@ -16,7 +16,7 @@ For natural language learners. Read it once and remember.
 
 1. Clone this repo.
 2. Create and activate a Python virtual environment (optional, but good practice).
-3.
+3. Run pip install: `pip install -r requirements.txt`
 
 ## How to Use
 
