@@ -7,7 +7,7 @@ from global_variables import source_language, target_language
 from models.note import Note
 
 GPT_MODEL = "gpt-3.5-turbo-1106"
-# gpt-3.5-turbo-1106 or gpt-4-1106-preview
+# gpt-3.5-turbo-1106 (cheaper) or gpt-4-1106-preview (more expensive)
 
 
 class OpenAiInterface:
@@ -19,7 +19,10 @@ class OpenAiInterface:
         response = openai.ChatCompletion.create(
             model=GPT_MODEL,
             messages=[
-                {"role": "system", "content": systemPrompt},
+                {
+                    "role": "system",
+                    "content": systemPrompt,
+                },
                 {
                     "role": "user",
                     "content": string,
