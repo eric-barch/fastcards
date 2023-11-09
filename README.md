@@ -19,8 +19,7 @@ For natural language learners. Read it once and remember.
 3. Run the setup script: `python setup.py`
 4. If you don't already have Anki on your machine, [install it](https://apps.ankiweb.net/).
 5. [Download the AnkiConnect add-on](https://ankiweb.net/shared/info/2055492159).
-6. Supply your own OpenAI API key. Store it in an environment variable or in a `.env` file.
-7. Run the `main.py` script to start the program.
+6. [ Supply your own OpenAI API key ](https://platform.openai.com/docs/quickstart/step-2-setup-your-api-key). Set the `OPENAI_API_KEY` variable in the `.env` file that was created by `setup.py`.
 
 ## How to Use
 
