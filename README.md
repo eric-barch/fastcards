@@ -1,4 +1,4 @@
-# fastcards
+# Fastcards
 
 For natural language learners. Read it once and remember.
 
@@ -23,4 +23,8 @@ For natural language learners. Read it once and remember.
 
 ## How to Use
 
-## Adapt for Other Languages
+1. Activate your Python virtual environment if applicable.
+2. Run `python main.py`.
+3. Choose a read and write Anki deck. The read deck will be used to check for existing flashcards, and new flashcards will be saved in the write deck.
+4. As you read, type unknown words or sentences into the prompt. Strings will be broken up into their component tokens, translated, and you will be given the option to save them as new flashcards.
+5. That's it! Use all the time you saved to study flashcards instead of making them!
