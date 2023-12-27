@@ -1,6 +1,6 @@
 # Fastcards
 
-For natural language learners. Read it once and remember.
+Automatically generate Anki flashcards as you read a foreign language.
 
 ## Use Case
 
